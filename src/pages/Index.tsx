@@ -4,6 +4,7 @@ import CategoryPanel from '@/components/CategoryPanel';
 import ScoreLegend from '@/components/ScoreLegend';
 import SegmentTable from '@/components/SegmentTable';
 import StatsBar from '@/components/StatsBar';
+import RadarChart from '@/components/RadarChart';
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 
 const Index = () => {
@@ -52,6 +53,12 @@ const Index = () => {
             <div className="text-sm font-semibold text-foreground">{activeCat.label}</div>
             <div className="text-xs text-muted-foreground">{activeCat.description}</div>
           </div>
+          {/* Radar chart overlay */}
+          {highlighted && (
+            <div className="absolute bottom-4 left-4 z-[1000]">
+              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} />
+            </div>
+          )}
         </div>
 
         {/* Side panel */}
