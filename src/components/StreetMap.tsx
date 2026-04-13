@@ -33,6 +33,9 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick }: StreetMapPr
     mapRef.current = map;
     layersRef.current = L.layerGroup().addTo(map);
 
+    // Fix tile rendering when container size isn't known at init
+    setTimeout(() => map.invalidateSize(), 200);
+
     return () => {
       map.remove();
       mapRef.current = null;
