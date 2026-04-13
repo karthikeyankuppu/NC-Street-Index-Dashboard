@@ -47,6 +47,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        score: {
+          critical: "hsl(var(--score-critical))",
+          poor: "hsl(var(--score-poor))",
+          fair: "hsl(var(--score-fair))",
+          good: "hsl(var(--score-good))",
+          excellent: "hsl(var(--score-excellent))",
+        },
+        "map-panel": {
+          DEFAULT: "hsl(var(--map-panel))",
+          foreground: "hsl(var(--map-panel-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
