@@ -22,7 +22,6 @@ function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
 
 const RadarChart = ({ segmentCode, onClose }: RadarChartProps) => {
   const score = getSegmentScore(segmentCode);
-  if (!score) return null;
 
   const size = 220;
   const cx = size / 2;
@@ -32,7 +31,9 @@ const RadarChart = ({ segmentCode, onClose }: RadarChartProps) => {
   const n = CATEGORIES.length;
   const angleStep = 360 / n;
 
-  const values: number[] = CATEGORIES.map(c => score[c.key]);
+  const values: number[] = score ? CATEGORIES.map(c => score[c.key]) : [];
+
+  const gridLines = useMemo(() => {
 
   const gridLines = useMemo(() => {
     const lines: JSX.Element[] = [];
