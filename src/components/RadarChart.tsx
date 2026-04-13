@@ -57,6 +57,8 @@ const RadarChart = ({ segmentCode, onClose }: RadarChartProps) => {
     return lines;
   }, []);
 
+  if (!score) return null;
+
   // Data polygon
   const dataPoints = values.map((v, i) => {
     const r = (v / 100) * maxR;
