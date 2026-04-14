@@ -23,10 +23,9 @@ const StatsBar = ({ category }: StatsBarProps) => {
   }, [category]);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {[
         { label: 'Average', value: stats.avg.toFixed(1), color: 'text-primary' },
-        { label: 'Range', value: `${stats.min.toFixed(0)}–${stats.max.toFixed(0)}`, color: 'text-foreground' },
         { label: 'Critical', value: stats.critical.toString(), color: 'text-score-critical' },
         { label: 'Segments', value: stats.total.toString(), color: 'text-foreground' },
       ].map(stat => (
