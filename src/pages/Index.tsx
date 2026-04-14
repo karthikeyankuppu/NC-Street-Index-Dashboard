@@ -90,7 +90,7 @@ const Index = () => {
           {/* Radar chart overlay */}
           {highlighted && (
             <div className="absolute bottom-4 left-4 z-[1000]">
-              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} />
+              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
             </div>
           )}
           {/* Amenity simulator overlay */}
