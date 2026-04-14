@@ -59,7 +59,7 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
               {projected.index.toFixed(1)}
             </span>
             {indexDelta > 0 && (
-              <span className="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-score-excellent bg-score-excellent/10 px-1.5 py-0.5 rounded">
                 +{indexDelta.toFixed(1)}
               </span>
             )}
@@ -131,7 +131,7 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
                   <span className="font-mono text-[10px] w-8 text-right" style={{ color: getScoreColor(after) }}>
                     {after.toFixed(0)}
                   </span>
-                  <span className="text-emerald-400 font-semibold text-[10px] w-6 text-right">
+                  <span className="text-score-excellent font-semibold text-[10px] w-6 text-right">
                     +{delta.toFixed(0)}
                   </span>
                 </div>
