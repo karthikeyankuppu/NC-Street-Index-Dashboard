@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import nayichaalLogo from '@/assets/nayichaal-logo.png';
 import StreetMap from '@/components/StreetMap';
 import CategoryPanel from '@/components/CategoryPanel';
 import ScoreLegend from '@/components/ScoreLegend';
@@ -49,13 +50,16 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card px-4 py-3 shrink-0">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">
-              NayiChaal Street Index
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Varanasi Street Assessment — March 2026
-            </p>
+          <div className="flex items-center gap-3">
+            <img src={nayichaalLogo} alt="NayiChaal" className="h-10 w-auto" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">
+                NayiChaal Street Index
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Varanasi Street Assessment — March 2026
+              </p>
+            </div>
           </div>
           <ScoreLegend />
         </div>
