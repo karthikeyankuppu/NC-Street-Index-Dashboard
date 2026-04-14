@@ -1,26 +1,38 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { getSegmentScore, getScoreColor, getScoreLabel } from '@/data/streetData';
-import { AMENITIES, applyAmenities } from '@/data/amenities';
-import { X, TrendingUp } from 'lucide-react';
+import { AMENITIES, applyPlacedAmenities, countAmenities, type PlacedAmenity } from '@/data/amenities';
+import { X, TrendingUp, MousePointerClick, Trash2 } from 'lucide-react';
 
 interface Props {
   segmentCode: string;
+  placedAmenities: PlacedAmenity[];
+  activeAmenity: string | null;
+  onSelectAmenity: (id: string | null) => void;
+  onRemoveAmenity: (uid: string) => void;
+  onClearAll: () => void;
   onClose: () => void;
 }
 
-const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
-  const [selected, setSelected] = useState<string[]>([]);
+const AmenitySimulator = ({
+  segmentCode,
+  placedAmenities,
+  activeAmenity,
+  onSelectAmenity,
+  onRemoveAmenity,
+  onClearAll,
+  onClose,
+}: Props) => {
   const base = getSegmentScore(segmentCode);
 
   const projected = useMemo(() => {
     if (!base) return null;
-    return applyAmenities(base, selected);
-  }, [base, selected]);
+    return applyPlacedAmenities(base, placedAmenities);
+  }, [base, placedAmenities]);
 
   if (!base || !projected) return null;
 
-  const toggle = (id: string) =>
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const counts = countAmenities(placedAmenities);
+  const totalPlaced = placedAmenities.length;
 
   const cats: { key: keyof typeof base; label: string }[] = [
     { key: 'walkability', label: 'Walkability' },
@@ -41,9 +53,20 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
           <TrendingUp className="w-4 h-4 text-primary" />
           <span className="text-sm font-bold text-foreground">What-If Simulator</span>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {totalPlaced > 0 && (
+            <button
+              onClick={onClearAll}
+              className="text-muted-foreground hover:text-destructive text-xs flex items-center gap-1 mr-2"
+              title="Remove all"
+            >
+              <Trash2 className="w-3 h-3" /> Clear
+            </button>
+          )}
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Segment badge + index */}
@@ -58,7 +81,7 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
             >
               {projected.index.toFixed(1)}
             </span>
-            {indexDelta > 0 && (
+            {indexDelta > 0.05 && (
               <span className="text-xs font-semibold text-score-excellent bg-score-excellent/10 px-1.5 py-0.5 rounded">
                 +{indexDelta.toFixed(1)}
               </span>
@@ -81,34 +104,83 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
         </div>
       </div>
 
-      {/* Amenity toggles */}
+      {/* Instruction */}
+      {activeAmenity && (
+        <div className="px-4 py-2 bg-primary/10 border-b border-border shrink-0 flex items-center gap-2">
+          <MousePointerClick className="w-4 h-4 text-primary animate-pulse" />
+          <span className="text-xs text-primary font-medium">
+            Click on the map to place {AMENITIES.find(a => a.id === activeAmenity)?.label}
+          </span>
+          <button onClick={() => onSelectAmenity(null)} className="ml-auto text-xs text-muted-foreground hover:text-foreground">
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Amenity buttons */}
       <div className="px-4 py-3 overflow-auto flex-1">
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">
-          Add Amenities
+          Click to select, then place on map
         </p>
         <div className="grid grid-cols-2 gap-1.5">
           {AMENITIES.map(a => {
-            const active = selected.includes(a.id);
+            const isActive = activeAmenity === a.id;
+            const count = counts[a.id] || 0;
             return (
               <button
                 key={a.id}
-                onClick={() => toggle(a.id)}
-                className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition-all text-xs ${
-                  active
-                    ? 'border-primary bg-primary/10 text-foreground'
+                onClick={() => onSelectAmenity(isActive ? null : a.id)}
+                className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition-all text-xs relative ${
+                  isActive
+                    ? 'border-primary bg-primary/15 text-foreground ring-1 ring-primary'
+                    : count > 0
+                    ? 'border-primary/50 bg-primary/5 text-foreground'
                     : 'border-border bg-muted/30 text-muted-foreground hover:border-muted-foreground/50'
                 }`}
               >
                 <span className="text-base">{a.icon}</span>
                 <span className="font-medium truncate">{a.label}</span>
+                {count > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
       </div>
 
+      {/* Placed amenities list */}
+      {totalPlaced > 0 && (
+        <div className="px-4 py-2 border-t border-border shrink-0 max-h-28 overflow-auto">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">
+            Placed ({totalPlaced})
+          </p>
+          <div className="space-y-0.5">
+            {placedAmenities.map(p => {
+              const def = AMENITIES.find(a => a.id === p.amenityId);
+              if (!def) return null;
+              return (
+                <div key={p.uid} className="flex items-center justify-between text-xs py-0.5">
+                  <span className="text-muted-foreground">
+                    {def.icon} {def.label}
+                  </span>
+                  <button
+                    onClick={() => onRemoveAmenity(p.uid)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Score breakdown */}
-      {selected.length > 0 && (
+      {totalPlaced > 0 && (
         <div className="px-4 py-3 border-t border-border shrink-0">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">
             Score Changes
@@ -118,7 +190,7 @@ const AmenitySimulator = ({ segmentCode, onClose }: Props) => {
               const before = base[cat.key] as number;
               const after = projected[cat.key] as number;
               const delta = after - before;
-              if (delta === 0) return null;
+              if (delta < 0.05) return null;
               return (
                 <div key={cat.key} className="flex items-center gap-2 text-xs">
                   <span className="text-muted-foreground w-20 truncate">{cat.label}</span>
