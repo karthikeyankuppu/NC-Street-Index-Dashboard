@@ -129,7 +129,9 @@ export function applyPlacedAmenities(base: SegmentScore, placed: PlacedAmenity[]
     newScore[cat] = Math.min(100, base[cat] + bonus);
   });
 
-  newScore.index = cats.reduce((sum, cat) => sum + newScore[cat] * CATEGORY_WEIGHTS[cat], 0);
+  // Compute index delta from category changes, preserving the original base index
+  const indexDelta = cats.reduce((sum, cat) => (newScore[cat] - base[cat]) * CATEGORY_WEIGHTS[cat], 0);
+  newScore.index = Math.min(100, base.index + indexDelta);
   return newScore as SegmentScore;
 }
 
