@@ -81,6 +81,14 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
           lineJoin: 'round',
         });
 
+        polyline.bindTooltip(`
+          <div style="font-family:system-ui;text-align:center">
+            <strong style="font-size:13px">${code}</strong>
+            <div style="margin:4px 0;font-size:18px;font-weight:700;color:${color}">${value.toFixed(1)}</div>
+            <div style="font-size:10px;color:#999">Click for details &amp; amenity simulation</div>
+          </div>
+        `, { sticky: true, direction: 'top', offset: [0, -10], className: 'segment-tooltip' });
+
         polyline.bindPopup(`
           <div style="font-family:system-ui;min-width:180px">
             <strong style="font-size:14px">${code}</strong>
