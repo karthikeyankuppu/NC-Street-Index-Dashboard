@@ -7,13 +7,39 @@ import StatsBar from '@/components/StatsBar';
 import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
+import { type PlacedAmenity } from '@/data/amenities';
 
 const Index = () => {
   const [category, setCategory] = useState<CategoryKey>('index');
   const [highlighted, setHighlighted] = useState<string | null>(null);
+  const [placedAmenities, setPlacedAmenities] = useState<PlacedAmenity[]>([]);
+  const [activeAmenity, setActiveAmenity] = useState<string | null>(null);
 
   const handleSegmentClick = useCallback((code: string | null) => {
-    setHighlighted(prev => prev === code ? null : code);
+    setHighlighted(prev => {
+      const next = prev === code ? null : code;
+      if (!next) {
+        // Clear amenities when deselecting
+        setPlacedAmenities([]);
+        setActiveAmenity(null);
+      }
+      return next;
+    });
+  }, []);
+
+  const handlePlaceAmenity = useCallback((latlng: [number, number]) => {
+    if (!activeAmenity) return;
+    const uid = `${activeAmenity}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setPlacedAmenities(prev => [...prev, { uid, amenityId: activeAmenity, latlng }]);
+  }, [activeAmenity]);
+
+  const handleRemoveAmenity = useCallback((uid: string) => {
+    setPlacedAmenities(prev => prev.filter(p => p.uid !== uid));
+  }, []);
+
+  const handleClearAll = useCallback(() => {
+    setPlacedAmenities([]);
+    setActiveAmenity(null);
   }, []);
 
   const activeCat = CATEGORIES.find(c => c.key === category)!;
@@ -47,6 +73,9 @@ const Index = () => {
               category={category}
               highlightedSegment={highlighted}
               onSegmentClick={handleSegmentClick}
+              placedAmenities={placedAmenities}
+              activeAmenity={activeAmenity}
+              onPlaceAmenity={handlePlaceAmenity}
             />
           </div>
           {/* Category info overlay */}
@@ -63,7 +92,15 @@ const Index = () => {
           {/* Amenity simulator overlay */}
           {highlighted && (
             <div className="absolute top-4 right-4 z-[1000]">
-              <AmenitySimulator segmentCode={highlighted} onClose={() => setHighlighted(null)} />
+              <AmenitySimulator
+                segmentCode={highlighted}
+                placedAmenities={placedAmenities}
+                activeAmenity={activeAmenity}
+                onSelectAmenity={setActiveAmenity}
+                onRemoveAmenity={handleRemoveAmenity}
+                onClearAll={handleClearAll}
+                onClose={() => setHighlighted(null)}
+              />
             </div>
           )}
         </div>
