@@ -5,6 +5,7 @@ import ScoreLegend from '@/components/ScoreLegend';
 import SegmentTable from '@/components/SegmentTable';
 import StatsBar from '@/components/StatsBar';
 import RadarChart from '@/components/RadarChart';
+import AmenitySimulator from '@/components/AmenitySimulator';
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 
 const Index = () => {
@@ -57,6 +58,12 @@ const Index = () => {
           {highlighted && (
             <div className="absolute bottom-4 left-4 z-[1000]">
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} />
+            </div>
+          )}
+          {/* Amenity simulator overlay */}
+          {highlighted && (
+            <div className="absolute top-4 right-4 z-[1000]">
+              <AmenitySimulator segmentCode={highlighted} onClose={() => setHighlighted(null)} />
             </div>
           )}
         </div>
