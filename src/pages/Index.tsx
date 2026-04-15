@@ -87,15 +87,9 @@ const Index = () => {
             <div className="text-sm font-semibold text-foreground">{activeCat.label}</div>
             <div className="text-xs text-muted-foreground">{activeCat.description}</div>
           </div>
-          {/* Radar chart overlay */}
+          {/* Simulator + Radar chart stacked on left */}
           {highlighted && (
-            <div className="absolute bottom-4 left-4 z-[1000]">
-              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
-            </div>
-          )}
-          {/* Amenity simulator overlay */}
-          {highlighted && (
-            <div className="absolute top-4 right-4 z-[1000]">
+            <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 max-h-[calc(100%-2rem)] overflow-auto">
               <AmenitySimulator
                 segmentCode={highlighted}
                 placedAmenities={placedAmenities}
@@ -105,6 +99,7 @@ const Index = () => {
                 onClearAll={handleClearAll}
                 onClose={() => setHighlighted(null)}
               />
+              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
             </div>
           )}
         </div>
