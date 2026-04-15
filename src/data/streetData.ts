@@ -261,33 +261,72 @@ export function getSegmentScore(code: string): SegmentScore | undefined {
   return scoreMap.get(normalize(code));
 }
 
-// Letter labels for segments (A, B, C, ... AA, AB, ...)
-const segmentCodes = Object.keys(segments);
+// Human-readable segment labels based on area/road names
+const SEGMENT_LABELS: Record<string, string> = {
+  // Known roads — single segment gets just the road name
+  'PR-01': 'Luxa Road',
+  
+  // Dashashwamedh Road (multiple segments)
+  'PR-02': 'Dashashwamedh Rd A',
+  'PR-03': 'Dashashwamedh Rd B',
+  'TR-01': 'Dashashwamedh Rd C',
+  
+  // Nai Sarak Road (multiple segments)
+  'PR-10': 'Nai Sarak A',
+  'PR-11': 'Nai Sarak B',
+  'PR-12': 'Nai Sarak C',
+  
+  // Meer Ghat Lane area (riverside, western)
+  'SR-01': 'Meer Ghat Lane A',
+  'SR-02': 'Meer Ghat Lane B',
+  'TR-56': 'Meer Ghat Lane C',
+  'TR-54': 'Meer Ghat Lane D',
+  
+  // Manikarnika area lanes
+  'SR-03': 'Manikarnika Lane A',
+  'TR-41': 'Manikarnika Lane B',
+  'TR-52': 'Manikarnika Lane C',
+  'TR-53': 'Manikarnika Lane D',
+  'TR-57': 'Manikarnika Lane E',
+  'TR-49': 'Manikarnika Lane F',
+  'TR-50': 'Manikarnika Lane G',
+  
+  // Chowk area lanes
+  'PR-05': 'Chowk Lane A',
+  'PR-06': 'Chowk Lane B',
+  'SR-06': 'Chowk Lane C',
+  'SR-07': 'Chowk Lane D',
+  'TR-27': 'Chowk Lane E',
+  'TR-48': 'Chowk Lane F',
+  
+  // Vishwanath area lanes
+  'SR-08': 'Vishwanath Lane A',
+  'TR-25': 'Vishwanath Lane B',
+  'TR-24': 'Vishwanath Lane C',
+  'TR-22': 'Vishwanath Lane D',
+  'TR-157': 'Vishwanath Lane E',
+  'TR-28': 'Vishwanath Lane F',
+  
+  // Godowlia area
+  'SR-04': 'Godowlia Lane A',
+  'SR-05': 'Godowlia Lane B',
+  'TR-14': 'Godowlia Lane C',
+  'TR-156': 'Godowlia Lane D',
+  
+  // Kedar Ghat area (southern)
+  'PR-04': 'Kedar Ghat Lane A',
+  'TR-149': 'Kedar Ghat Lane B',
+  'TR-12': 'Kedar Ghat Lane C',
+  
+  // Scindia Ghat area (northern)
+  'PR-07': 'Scindia Ghat A',
+  'PR-08': 'Scindia Ghat B',
+  'PR-09': 'Scindia Ghat C',
+};
+
 const codeToLabelMap = new Map<string, string>();
-const labelToCodeMap = new Map<string, string>();
-
-function toLetter(i: number): string {
-  let result = '';
-  let n = i;
-  do {
-    result = String.fromCharCode(65 + (n % 26)) + result;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return result;
-}
-
-segmentCodes.forEach((code, i) => {
-  const label = `Segment ${toLetter(i)}`;
+Object.entries(SEGMENT_LABELS).forEach(([code, label]) => {
   codeToLabelMap.set(normalize(code), label);
-  labelToCodeMap.set(label, code);
-});
-
-// Also map score codes
-scores.forEach((s, i) => {
-  const norm = normalize(s.code);
-  if (!codeToLabelMap.has(norm)) {
-    codeToLabelMap.set(norm, `Segment ${toLetter(segmentCodes.length + i)}`);
-  }
 });
 
 export function getSegmentLabel(code: string): string {
