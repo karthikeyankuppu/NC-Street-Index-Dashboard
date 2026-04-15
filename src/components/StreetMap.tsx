@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
-import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, type CategoryKey } from '@/data/streetData';
+import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, type CategoryKey } from '@/data/streetData';
 import { AMENITIES, type PlacedAmenity } from '@/data/amenities';
 
 interface StreetMapProps {
@@ -81,9 +81,10 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
           lineJoin: 'round',
         });
 
+        const label = getSegmentLabel(code);
         polyline.bindTooltip(`
           <div style="font-family:system-ui;text-align:center">
-            <strong style="font-size:13px">${code}</strong>
+            <strong style="font-size:13px">${label}</strong>
             <div style="margin:4px 0;font-size:18px;font-weight:700;color:${color}">${value.toFixed(1)}</div>
             <div style="font-size:10px;color:#999">Click for details &amp; amenity simulation</div>
           </div>
@@ -91,7 +92,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
 
         polyline.bindPopup(`
           <div style="font-family:system-ui;min-width:180px">
-            <strong style="font-size:14px">${code}</strong>
+            <strong style="font-size:14px">${label}</strong>
             <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12px">
               <span style="color:#999">Index</span><span><b>${scoreData.index}</b></span>
               <span style="color:#999">Walkability</span><span>${scoreData.walkability}</span>
