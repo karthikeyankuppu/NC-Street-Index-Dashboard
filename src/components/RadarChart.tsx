@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getSegmentScore, getScoreColor } from '@/data/streetData';
+import { getSegmentScore, getScoreColor, getSegmentLabel } from '@/data/streetData';
 import { applyPlacedAmenities, type PlacedAmenity } from '@/data/amenities';
 
 interface RadarChartProps {
@@ -79,7 +79,7 @@ const RadarChart = ({ segmentCode, onClose, placedAmenities = [] }: RadarChartPr
     <div className="bg-card border border-border rounded-lg p-4 shadow-xl">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <span className="text-sm font-bold text-foreground font-mono">{segmentCode}</span>
+          <span className="text-sm font-bold text-foreground font-mono">{getSegmentLabel(segmentCode)}</span>
           <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}20`, color }}>
             Index: {score.index.toFixed(1)}
           </span>

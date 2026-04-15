@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getSegmentScore, getScoreColor, getScoreLabel } from '@/data/streetData';
+import { getSegmentScore, getScoreColor, getScoreLabel, getSegmentLabel } from '@/data/streetData';
 import { AMENITIES, applyPlacedAmenities, countAmenities, type PlacedAmenity } from '@/data/amenities';
 import { X, TrendingUp, MousePointerClick, Trash2 } from 'lucide-react';
 
@@ -72,7 +72,7 @@ const AmenitySimulator = ({
       {/* Segment badge + index */}
       <div className="px-4 py-3 border-b border-border shrink-0">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-sm font-bold text-foreground">{segmentCode}</span>
+          <span className="font-mono text-sm font-bold text-foreground">{getSegmentLabel(segmentCode)}</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Index</span>
             <span

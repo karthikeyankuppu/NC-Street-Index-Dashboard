@@ -260,3 +260,36 @@ scores.forEach(s => scoreMap.set(normalize(s.code), s));
 export function getSegmentScore(code: string): SegmentScore | undefined {
   return scoreMap.get(normalize(code));
 }
+
+// Letter labels for segments (A, B, C, ... AA, AB, ...)
+const segmentCodes = Object.keys(segments);
+const codeToLabelMap = new Map<string, string>();
+const labelToCodeMap = new Map<string, string>();
+
+function toLetter(i: number): string {
+  let result = '';
+  let n = i;
+  do {
+    result = String.fromCharCode(65 + (n % 26)) + result;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return result;
+}
+
+segmentCodes.forEach((code, i) => {
+  const label = `Segment ${toLetter(i)}`;
+  codeToLabelMap.set(normalize(code), label);
+  labelToCodeMap.set(label, code);
+});
+
+// Also map score codes
+scores.forEach((s, i) => {
+  const norm = normalize(s.code);
+  if (!codeToLabelMap.has(norm)) {
+    codeToLabelMap.set(norm, `Segment ${toLetter(segmentCodes.length + i)}`);
+  }
+});
+
+export function getSegmentLabel(code: string): string {
+  return codeToLabelMap.get(normalize(code)) || code;
+}

@@ -1,4 +1,4 @@
-import { scores, getScoreColor, getScoreForCategory, getScoreLabel, segments, type CategoryKey } from '@/data/streetData';
+import { scores, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, segments, type CategoryKey } from '@/data/streetData';
 import { useMemo } from 'react';
 
 interface SegmentTableProps {
@@ -43,7 +43,7 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover }: SegmentT
                 onMouseEnter={() => onSegmentHover(s.code)}
                 onMouseLeave={() => onSegmentHover(null)}
               >
-                <td className="py-1.5 px-2 font-mono font-medium">{s.code}</td>
+                <td className="py-1.5 px-2 font-mono font-medium">{getSegmentLabel(s.code)}</td>
                 <td className="py-1.5 px-2 text-right font-bold" style={{ color }}>
                   {value.toFixed(1)}
                 </td>
