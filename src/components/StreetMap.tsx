@@ -1,7 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react';
-import L from 'leaflet';
+import { useEffect, useRef } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, type CategoryKey } from '@/data/streetData';
 import { AMENITIES, type PlacedAmenity } from '@/data/amenities';
+import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
 
 interface StreetMapProps {
   category: CategoryKey;
@@ -10,139 +12,248 @@ interface StreetMapProps {
   placedAmenities: PlacedAmenity[];
   activeAmenity: string | null;
   onPlaceAmenity: (latlng: [number, number]) => void;
+  showSignage: boolean;
+  is3D: boolean;
 }
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity }: StreetMapProps) => {
-  const mapRef = useRef<L.Map | null>(null);
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, is3D }: StreetMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const layersRef = useRef<L.LayerGroup | null>(null);
-  const markersRef = useRef<L.LayerGroup | null>(null);
-  const activeAmenityRef = useRef(activeAmenity);
-  activeAmenityRef.current = activeAmenity;
-  const onPlaceRef = useRef(onPlaceAmenity);
-  onPlaceRef.current = onPlaceAmenity;
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const signageMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const tooltipRef = useRef<maplibregl.Popup | null>(null);
+  const readyRef = useRef(false);
 
-  // Initialize map
+  // Stable refs for callbacks used inside map events
+  const stableRefs = useRef({ category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity });
+  stableRefs.current = { category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity };
+
+  // Init map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(containerRef.current, {
-      center: [25.310, 83.008],
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: {
+        version: 8,
+        sources: {
+          'carto-dark': {
+            type: 'raster',
+            tiles: [
+              'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+              'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+            ],
+            tileSize: 256,
+            attribution: '&copy; OSM &copy; CARTO',
+          },
+        },
+        layers: [
+          { id: 'bg', type: 'background', paint: { 'background-color': '#0a0a0a' } },
+          { id: 'carto', type: 'raster', source: 'carto-dark' },
+        ],
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+      },
+      center: [83.008, 25.310],
       zoom: 16,
-      zoomControl: false,
+      pitch: 0,
+      bearing: 0,
+      maxPitch: 85,
     });
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      maxZoom: 20,
-    }).addTo(map);
+    map.on('load', () => {
+      // Buildings source (OpenFreeMap)
+      map.addSource('ofm', { type: 'vector', url: 'https://tiles.openfreemap.org/planet' });
+      map.addLayer({
+        id: '3d-buildings',
+        source: 'ofm',
+        'source-layer': 'building',
+        type: 'fill-extrusion',
+        minzoom: 14,
+        paint: {
+          'fill-extrusion-color': '#1a1a2e',
+          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 10],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.7,
+        },
+        layout: { visibility: 'none' },
+      });
 
-    mapRef.current = map;
-    layersRef.current = L.layerGroup().addTo(map);
-    markersRef.current = L.layerGroup().addTo(map);
+      // Add segment line sources + layers
+      Object.entries(segments).forEach(([code, geos]) => {
+        const features = geos.map(geo => ({
+          type: 'Feature' as const,
+          properties: { code },
+          geometry: { type: 'LineString' as const, coordinates: geo.coordinates },
+        }));
 
-    // Click handler for placing amenities
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      if (activeAmenityRef.current) {
-        onPlaceRef.current([e.latlng.lat, e.latlng.lng]);
+        map.addSource(`seg-${code}`, {
+          type: 'geojson',
+          data: { type: 'FeatureCollection' as const, features },
+        });
+
+        const sd = getSegmentScore(code);
+        const v = sd ? getScoreForCategory(sd, 'index') : 0;
+
+        map.addLayer({
+          id: `seg-${code}`,
+          type: 'line',
+          source: `seg-${code}`,
+          paint: { 'line-color': getScoreColor(v), 'line-width': 4, 'line-opacity': 0.9 },
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+        });
+
+        map.on('click', `seg-${code}`, (e) => {
+          e.originalEvent.stopPropagation();
+          stableRefs.current.onSegmentClick(code);
+          showSegmentPopup(map, code);
+        });
+
+        map.on('mouseenter', `seg-${code}`, (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const sd2 = getSegmentScore(code);
+          if (!sd2) return;
+          const cat = stableRefs.current.category;
+          const val = getScoreForCategory(sd2, cat);
+          const col = getScoreColor(val);
+          tooltipRef.current?.remove();
+          tooltipRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 })
+            .setLngLat(e.lngLat)
+            .setHTML(`<div style="font-family:system-ui;text-align:center"><strong>${getSegmentLabel(code)}</strong><div style="margin:4px 0;font-size:18px;font-weight:700;color:${col}">${val.toFixed(1)}</div><div style="font-size:10px;color:#999">Click for details</div></div>`)
+            .addTo(map);
+        });
+
+        map.on('mouseleave', `seg-${code}`, () => {
+          map.getCanvas().style.cursor = '';
+          tooltipRef.current?.remove();
+          tooltipRef.current = null;
+        });
+      });
+
+      readyRef.current = true;
+    });
+
+    map.on('click', (e) => {
+      if (stableRefs.current.activeAmenity) {
+        stableRefs.current.onPlaceAmenity([e.lngLat.lat, e.lngLat.lng]);
       }
     });
 
-    setTimeout(() => map.invalidateSize(), 200);
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
   }, []);
 
-  // Update segment layers
+  // 3D toggle
   useEffect(() => {
-    if (!mapRef.current || !layersRef.current) return;
-    layersRef.current.clearLayers();
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({ pitch: is3D ? 60 : 0, bearing: is3D ? -17 : 0, duration: 1000 });
+    if (readyRef.current && map.getLayer('3d-buildings')) {
+      map.setLayoutProperty('3d-buildings', 'visibility', is3D ? 'visible' : 'none');
+    }
+  }, [is3D]);
 
-    Object.entries(segments).forEach(([code, geos]) => {
-      const scoreData = getSegmentScore(code);
-      if (!scoreData) return;
+  // Update segment paint on category/highlight change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
 
-      const value = getScoreForCategory(scoreData, category);
-      const color = getScoreColor(value);
-      const isHighlighted = highlightedSegment === code;
-
-      geos.forEach(geo => {
-        const latlngs = geo.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]);
-        const polyline = L.polyline(latlngs, {
-          color,
-          weight: isHighlighted ? 7 : 4,
-          opacity: highlightedSegment && !isHighlighted ? 0.3 : 0.9,
-          lineCap: 'round',
-          lineJoin: 'round',
-        });
-
-        const label = getSegmentLabel(code);
-        polyline.bindTooltip(`
-          <div style="font-family:system-ui;text-align:center">
-            <strong style="font-size:13px">${label}</strong>
-            <div style="margin:4px 0;font-size:18px;font-weight:700;color:${color}">${value.toFixed(1)}</div>
-            <div style="font-size:10px;color:#999">Click for details &amp; amenity simulation</div>
-          </div>
-        `, { sticky: true, direction: 'top', offset: [0, -10], className: 'segment-tooltip' });
-
-        polyline.bindPopup(`
-          <div style="font-family:system-ui;min-width:180px">
-            <strong style="font-size:14px">${label}</strong>
-            <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12px">
-              <span style="color:#999">Index</span><span><b>${scoreData.index}</b></span>
-              <span style="color:#999">Walkability</span><span>${scoreData.walkability}</span>
-              <span style="color:#999">Lighting</span><span>${scoreData.lighting}</span>
-              <span style="color:#999">Transport</span><span>${scoreData.transport}</span>
-              <span style="color:#999">Visibility</span><span>${scoreData.visibility}</span>
-              <span style="color:#999">Accessibility</span><span>${scoreData.accessibility}</span>
-              <span style="color:#999">Road Safety</span><span>${scoreData.roadSafety}</span>
-            </div>
-            <div style="margin-top:6px;padding:4px 8px;border-radius:4px;background:${color}20;color:${color};font-weight:600;text-align:center;font-size:12px">
-              ${getScoreLabel(value)} — ${value.toFixed(1)}
-            </div>
-          </div>
-        `);
-
-        polyline.on('click', () => onSegmentClick(code));
-        layersRef.current!.addLayer(polyline);
-      });
+    Object.keys(segments).forEach(code => {
+      const lid = `seg-${code}`;
+      if (!map.getLayer(lid)) return;
+      const sd = getSegmentScore(code);
+      if (!sd) return;
+      const v = getScoreForCategory(sd, category);
+      const col = getScoreColor(v);
+      const hl = highlightedSegment === code;
+      map.setPaintProperty(lid, 'line-color', col);
+      map.setPaintProperty(lid, 'line-width', hl ? 7 : 4);
+      map.setPaintProperty(lid, 'line-opacity', highlightedSegment && !hl ? 0.3 : 0.9);
     });
-  }, [category, highlightedSegment, onSegmentClick]);
+  }, [category, highlightedSegment]);
 
-  // Update amenity markers
+  // Amenity markers
   useEffect(() => {
-    if (!markersRef.current) return;
-    markersRef.current.clearLayers();
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+    const map = mapRef.current;
+    if (!map) return;
 
     placedAmenities.forEach(p => {
       const def = AMENITIES.find(a => a.id === p.amenityId);
       if (!def) return;
-
-      const icon = L.divIcon({
-        html: `<div style="font-size:20px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));cursor:pointer;text-align:center;line-height:1">${def.icon}</div>`,
-        className: 'amenity-marker',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      });
-
-      const marker = L.marker(p.latlng, { icon });
-      marker.bindTooltip(`${def.icon} ${def.label}`, { direction: 'top', offset: [0, -10] });
-      markersRef.current!.addLayer(marker);
+      const el = document.createElement('div');
+      el.style.cssText = 'font-size:20px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));cursor:pointer;text-align:center;line-height:1';
+      el.textContent = def.icon;
+      const m = new maplibregl.Marker({ element: el })
+        .setLngLat([p.latlng[1], p.latlng[0]])
+        .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(`<div style="font-size:12px">${def.icon} ${def.label}</div>`))
+        .addTo(map);
+      markersRef.current.push(m);
     });
   }, [placedAmenities]);
 
-  // Change cursor when placing
+  // Signage markers
   useEffect(() => {
-    if (!containerRef.current) return;
-    containerRef.current.style.cursor = activeAmenity ? 'crosshair' : '';
+    signageMarkersRef.current.forEach(m => m.remove());
+    signageMarkersRef.current = [];
+    const map = mapRef.current;
+    if (!map || !showSignage) return;
+
+    SIGNAGE_POINTS.forEach(sp => {
+      const catInfo = SIGNAGE_CATEGORIES[sp.category] || SIGNAGE_CATEGORIES.T1;
+      const el = document.createElement('div');
+      el.style.cssText = `width:24px;height:24px;border-radius:50%;background:${catInfo.color};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)`;
+      el.textContent = sp.category === 'INFO' ? 'i' : sp.category.charAt(1);
+
+      const phaseLabel = sp.phase === 0 ? 'Info Board' : `Phase ${sp.phase}`;
+      const nameLabel = sp.name ? `<br/><b>${sp.name}</b>` : '';
+      const popup = new maplibregl.Popup({ offset: 14 }).setHTML(
+        `<div style="font-size:12px;font-family:system-ui"><b>${catInfo.label} Signage</b>${nameLabel}<div style="color:#999;margin-top:2px">${phaseLabel} • ${sp.id}</div></div>`
+      );
+
+      const m = new maplibregl.Marker({ element: el }).setLngLat([sp.lng, sp.lat]).setPopup(popup).addTo(map);
+      signageMarkersRef.current.push(m);
+    });
+  }, [showSignage]);
+
+  // Cursor
+  useEffect(() => {
+    if (containerRef.current) containerRef.current.style.cursor = activeAmenity ? 'crosshair' : '';
   }, [activeAmenity]);
 
   return <div ref={containerRef} className="w-full h-full rounded-lg" />;
 };
+
+function showSegmentPopup(map: maplibregl.Map, code: string) {
+  const sd = getSegmentScore(code);
+  if (!sd) return;
+  const label = getSegmentLabel(code);
+  const color = getScoreColor(sd.index);
+  const geos = segments[code];
+  if (!geos?.length) return;
+  const all = geos.flatMap(g => g.coordinates);
+  const cLng = all.reduce((s, c) => s + c[0], 0) / all.length;
+  const cLat = all.reduce((s, c) => s + c[1], 0) / all.length;
+
+  new maplibregl.Popup({ offset: 10 }).setLngLat([cLng, cLat]).setHTML(`
+    <div style="font-family:system-ui;min-width:180px">
+      <strong style="font-size:14px">${label}</strong>
+      <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12px">
+        <span style="color:#999">Index</span><span><b>${sd.index}</b></span>
+        <span style="color:#999">Walkability</span><span>${sd.walkability}</span>
+        <span style="color:#999">Lighting</span><span>${sd.lighting}</span>
+        <span style="color:#999">Transport</span><span>${sd.transport}</span>
+        <span style="color:#999">Visibility</span><span>${sd.visibility}</span>
+        <span style="color:#999">Accessibility</span><span>${sd.accessibility}</span>
+        <span style="color:#999">Road Safety</span><span>${sd.roadSafety}</span>
+      </div>
+      <div style="margin-top:6px;padding:4px 8px;border-radius:4px;background:${color}20;color:${color};font-weight:600;text-align:center;font-size:12px">
+        ${getScoreLabel(sd.index)} — ${sd.index.toFixed(1)}
+      </div>
+    </div>
+  `).addTo(map);
+}
 
 export default StreetMap;
