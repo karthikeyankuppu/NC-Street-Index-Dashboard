@@ -101,9 +101,8 @@ export function getSignageBySegment(): Record<string, SignagePoint[]> {
 
 // Impact of wayfinding signage on scores
 const SIGNAGE_IMPACT: Partial<Record<Exclude<CategoryKey, 'index'>, number>> = {
-  visibility: 6,
-  walkability: 3,
-  accessibility: 2,
+  walkability: 5,
+  roadSafety: 4,
 };
 
 const CATEGORY_WEIGHTS: Record<Exclude<CategoryKey, 'index'>, number> = {
