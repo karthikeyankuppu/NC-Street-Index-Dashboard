@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import nayichaalLogo from '@/assets/nayichaal-logo.png';
 import StreetMap from '@/components/StreetMap';
 import CategoryPanel from '@/components/CategoryPanel';
@@ -7,20 +7,24 @@ import SegmentTable from '@/components/SegmentTable';
 import StatsBar from '@/components/StatsBar';
 import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
+import SignageImpactPanel from '@/components/SignageImpactPanel';
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 import { type PlacedAmenity } from '@/data/amenities';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const Index = () => {
   const [category, setCategory] = useState<CategoryKey>('index');
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [placedAmenities, setPlacedAmenities] = useState<PlacedAmenity[]>([]);
   const [activeAmenity, setActiveAmenity] = useState<string | null>(null);
+  const [showSignage, setShowSignage] = useState(false);
+  const [is3D, setIs3D] = useState(false);
 
   const handleSegmentClick = useCallback((code: string | null) => {
     setHighlighted(prev => {
       const next = prev === code ? null : code;
       if (!next) {
-        // Clear amenities when deselecting
         setPlacedAmenities([]);
         setActiveAmenity(null);
       }
@@ -61,7 +65,18 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <ScoreLegend />
+          <div className="flex items-center gap-4">
+            {/* Toggles */}
+            <div className="flex items-center gap-2">
+              <Switch id="3d-toggle" checked={is3D} onCheckedChange={setIs3D} />
+              <Label htmlFor="3d-toggle" className="text-xs text-muted-foreground cursor-pointer">3D</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
+              <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">Signage</Label>
+            </div>
+            <ScoreLegend />
+          </div>
         </div>
         <div className="mt-3">
           <CategoryPanel activeCategory={category} onCategoryChange={setCategory} />
@@ -80,14 +95,18 @@ const Index = () => {
               placedAmenities={placedAmenities}
               activeAmenity={activeAmenity}
               onPlaceAmenity={handlePlaceAmenity}
+              showSignage={showSignage}
+              is3D={is3D}
             />
           </div>
           {/* Category info overlay */}
-          <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border px-4 py-2 shadow-lg max-w-xs">
-            <div className="text-sm font-semibold text-foreground">{activeCat.label}</div>
-            <div className="text-xs text-muted-foreground">{activeCat.description}</div>
-          </div>
-          {/* Simulator + Radar chart stacked on left */}
+          {!highlighted && (
+            <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border px-4 py-2 shadow-lg max-w-xs">
+              <div className="text-sm font-semibold text-foreground">{activeCat.label}</div>
+              <div className="text-xs text-muted-foreground">{activeCat.description}</div>
+            </div>
+          )}
+          {/* Simulator + Radar chart */}
           {highlighted && (
             <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 max-h-[calc(100%-2rem)] overflow-auto">
               <AmenitySimulator
@@ -100,6 +119,12 @@ const Index = () => {
                 onClose={() => setHighlighted(null)}
               />
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
+            </div>
+          )}
+          {/* Signage impact panel */}
+          {showSignage && (
+            <div className="absolute bottom-4 left-4 z-[1000]">
+              <SignageImpactPanel />
             </div>
           )}
         </div>
