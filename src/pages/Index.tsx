@@ -7,7 +7,7 @@ import SegmentTable from '@/components/SegmentTable';
 import StatsBar from '@/components/StatsBar';
 import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
-import SignageImpactPanel from '@/components/SignageImpactPanel';
+
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 import { type PlacedAmenity } from '@/data/amenities';
 import { Switch } from '@/components/ui/switch';
@@ -73,7 +73,7 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2">
               <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
-              <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">Signage</Label>
+              <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">Wayfinding Masterplan (NayiChaal Saarthi)</Label>
             </div>
             <ScoreLegend />
           </div>
@@ -121,12 +121,6 @@ const Index = () => {
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
             </div>
           )}
-          {/* Signage impact panel */}
-          {showSignage && (
-            <div className="absolute bottom-4 left-4 z-[1000]">
-              <SignageImpactPanel />
-            </div>
-          )}
         </div>
 
         {/* Side panel */}
@@ -144,6 +138,7 @@ const Index = () => {
                 category={category}
                 highlightedSegment={highlighted}
                 onSegmentHover={setHighlighted}
+                showSignageImpact={showSignage}
               />
             </div>
           </div>
