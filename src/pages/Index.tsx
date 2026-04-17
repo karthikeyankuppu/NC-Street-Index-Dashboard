@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import nayichaalLogo from '@/assets/nayichaal-logo.png';
 import StreetMap from '@/components/StreetMap';
 import CategoryPanel from '@/components/CategoryPanel';
@@ -10,8 +10,12 @@ import AmenitySimulator from '@/components/AmenitySimulator';
 
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 import { type PlacedAmenity } from '@/data/amenities';
+import { QUARTERS } from '@/data/signageData';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CalendarDays } from 'lucide-react';
 
 const Index = () => {
   const [category, setCategory] = useState<CategoryKey>('index');
@@ -19,6 +23,7 @@ const Index = () => {
   const [placedAmenities, setPlacedAmenities] = useState<PlacedAmenity[]>([]);
   const [activeAmenity, setActiveAmenity] = useState<string | null>(null);
   const [showSignage, setShowSignage] = useState(false);
+  const [signageQuarter, setSignageQuarter] = useState<number>(1);
   const [is3D, setIs3D] = useState(false);
 
   const handleSegmentClick = useCallback((code: string | null) => {
@@ -50,6 +55,7 @@ const Index = () => {
   const activeCat = CATEGORIES.find(c => c.key === category)!;
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card px-4 py-3 shrink-0">
@@ -72,8 +78,45 @@ const Index = () => {
               <Label htmlFor="3d-toggle" className="text-xs text-muted-foreground cursor-pointer">3D</Label>
             </div>
             <div className="flex items-center gap-2">
-              <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
-              <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">Wayfinding Masterplan (NayiChaal Saarthi)</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
+                    <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                      Wayfinding Masterplan (NayiChaal Saarthi)
+                    </Label>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <div className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5" /> Festivals by Quarter
+                  </div>
+                  <div className="space-y-1">
+                    {QUARTERS.map(q => (
+                      <div key={q.id} className="text-[11px]">
+                        <span className="font-semibold">{q.label} ({q.months}):</span>{' '}
+                        <span className="text-muted-foreground">
+                          {q.festivals.length ? q.festivals.join(', ') : '—'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+              {showSignage && (
+                <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
+                  <SelectTrigger className="h-7 w-28 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {QUARTERS.map(q => (
+                      <SelectItem key={q.id} value={String(q.id)} className="text-xs">
+                        {q.label} • {q.months}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <ScoreLegend />
           </div>
@@ -96,6 +139,7 @@ const Index = () => {
               activeAmenity={activeAmenity}
               onPlaceAmenity={handlePlaceAmenity}
               showSignage={showSignage}
+              signageQuarter={signageQuarter}
               is3D={is3D}
             />
           </div>
@@ -129,22 +173,24 @@ const Index = () => {
             <h2 className="text-sm font-semibold text-foreground mb-3">Statistics</h2>
             <StatsBar category={category} />
           </div>
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="px-4 pt-3 pb-1">
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="px-4 pt-3 pb-1 shrink-0">
               <h2 className="text-sm font-semibold text-foreground">Segments</h2>
             </div>
-            <div className="flex-1 overflow-auto px-2">
+            <div className="flex-1 overflow-auto px-2 min-h-0">
               <SegmentTable
                 category={category}
                 highlightedSegment={highlighted}
                 onSegmentHover={setHighlighted}
                 showSignageImpact={showSignage}
+                signageQuarter={signageQuarter}
               />
             </div>
           </div>
         </aside>
       </div>
     </div>
+    </TooltipProvider>
   );
 };
 
