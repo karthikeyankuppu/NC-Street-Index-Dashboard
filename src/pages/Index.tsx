@@ -10,7 +10,7 @@ import AmenitySimulator from '@/components/AmenitySimulator';
 
 import { CATEGORIES, type CategoryKey } from '@/data/streetData';
 import { type PlacedAmenity } from '@/data/amenities';
-import { QUARTERS } from '@/data/signageData';
+import { QUARTERS, SIGNAGE_CATEGORIES, SIGNAGE_POINTS } from '@/data/signageData';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -105,7 +105,7 @@ const Index = () => {
               </Tooltip>
               {showSignage && (
                 <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
-                  <SelectTrigger className="h-7 w-28 text-xs">
+                  <SelectTrigger className="h-7 w-44 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -163,6 +163,32 @@ const Index = () => {
                 onClearAll={handleClearAll}
                 onClose={() => setHighlighted(null)}
               />
+            </div>
+          )}
+          {/* Wayfinding legend (bottom-right) */}
+          {showSignage && (
+            <div className="absolute bottom-4 right-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
+              <div className="font-semibold text-foreground mb-1.5">
+                Wayfinding • {QUARTERS.find(q => q.id === signageQuarter)?.label}
+              </div>
+              <div className="space-y-1">
+                {Object.entries(SIGNAGE_CATEGORIES).map(([key, info]) => {
+                  const count = SIGNAGE_POINTS.filter(sp => sp.quarter === signageQuarter && sp.category === key).length;
+                  if (count === 0) return null;
+                  return (
+                    <div key={key} className="flex items-center gap-2">
+                      <span
+                        className="inline-flex items-center justify-center rounded-full text-[10px] shrink-0"
+                        style={{ background: info.color, width: 18, height: 18, border: '1.5px solid white' }}
+                      >
+                        {info.icon}
+                      </span>
+                      <span className="text-muted-foreground flex-1 truncate">{info.label}</span>
+                      <span className="text-foreground font-medium">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
