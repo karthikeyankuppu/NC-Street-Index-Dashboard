@@ -1,5 +1,5 @@
 import { scores, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, segments, type CategoryKey } from '@/data/streetData';
-import { getSignageBySegment, applySignageImpact, type SignagePoint } from '@/data/signageData';
+import { getSignageBySegment, applySignageImpact } from '@/data/signageData';
 import { useMemo } from 'react';
 
 interface SegmentTableProps {
@@ -7,10 +7,11 @@ interface SegmentTableProps {
   highlightedSegment: string | null;
   onSegmentHover: (code: string | null) => void;
   showSignageImpact?: boolean;
+  signageQuarter?: number;
 }
 
-const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignageImpact }: SegmentTableProps) => {
-  const signageBySegment = useMemo(() => showSignageImpact ? getSignageBySegment() : {}, [showSignageImpact]);
+const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignageImpact, signageQuarter }: SegmentTableProps) => {
+  const signageBySegment = useMemo(() => showSignageImpact ? getSignageBySegment(signageQuarter) : {}, [showSignageImpact, signageQuarter]);
 
   const sortedScores = useMemo(() => {
     const withGeo = scores.filter(s => {
@@ -23,7 +24,7 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignag
   }, [category]);
 
   return (
-    <div className="overflow-auto max-h-[calc(100vh-280px)]">
+    <div>
       <table className="w-full text-xs">
         <thead>
           <tr className="border-b border-border">

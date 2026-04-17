@@ -78,17 +78,7 @@ const RadarChart = ({ segmentCode, onClose, placedAmenities = [] }: RadarChartPr
   return (
     <div className="bg-card border border-border rounded-lg p-4 shadow-xl">
       <div className="flex items-center justify-between mb-2">
-        <div>
-          <span className="text-sm font-bold text-foreground font-mono">{getSegmentLabel(segmentCode)}</span>
-          <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}20`, color }}>
-            Index: {score.index.toFixed(1)}
-          </span>
-          {projected && (
-            <span className="ml-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${projColor}20`, color: projColor }}>
-              → {projected.index.toFixed(1)}
-            </span>
-          )}
-        </div>
+        <span className="text-sm font-bold text-foreground font-mono">{getSegmentLabel(segmentCode)}</span>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none">×</button>
       </div>
       <svg width={size} height={size} className="mx-auto">
