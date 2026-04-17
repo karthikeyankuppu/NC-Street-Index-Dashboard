@@ -105,7 +105,7 @@ const Index = () => {
               </Tooltip>
               {showSignage && (
                 <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
-                  <SelectTrigger className="h-7 w-28 text-xs">
+                  <SelectTrigger className="h-7 w-44 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
