@@ -13,10 +13,11 @@ interface StreetMapProps {
   activeAmenity: string | null;
   onPlaceAmenity: (latlng: [number, number]) => void;
   showSignage: boolean;
+  signageQuarter: number;
   is3D: boolean;
 }
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, is3D }: StreetMapProps) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, signageQuarter, is3D }: StreetMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -201,22 +202,23 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     const map = mapRef.current;
     if (!map || !showSignage) return;
 
-    SIGNAGE_POINTS.forEach(sp => {
-      const catInfo = SIGNAGE_CATEGORIES[sp.category] || SIGNAGE_CATEGORIES.T1;
+    SIGNAGE_POINTS.filter(sp => sp.quarter === signageQuarter).forEach(sp => {
+      const catInfo = SIGNAGE_CATEGORIES[sp.category];
+      if (!catInfo) return;
       const el = document.createElement('div');
-      el.style.cssText = `width:24px;height:24px;border-radius:50%;background:${catInfo.color};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)`;
-      el.textContent = sp.category === 'INFO' ? 'i' : sp.category.charAt(1);
+      el.style.cssText = `width:26px;height:26px;border-radius:50%;background:${catInfo.color};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)`;
+      el.textContent = catInfo.icon;
 
-      const phaseLabel = sp.phase === 0 ? 'Info Board' : `Phase ${sp.phase}`;
+      const subLabel = sp.subcategory ? ` (${sp.subcategory})` : '';
       const nameLabel = sp.name ? `<br/><b>${sp.name}</b>` : '';
-      const popup = new maplibregl.Popup({ offset: 14 }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui"><b>${catInfo.label} Signage</b>${nameLabel}<div style="color:#999;margin-top:2px">${phaseLabel} • ${sp.id}</div></div>`
+      const popup = new maplibregl.Popup({ offset: 14, className: 'nc-popup' }).setHTML(
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5"><b style="color:#fff">${catInfo.label}${subLabel}</b>${nameLabel}<div style="color:#888;margin-top:2px">Q${sp.quarter} • ${sp.id}</div></div>`
       );
 
       const m = new maplibregl.Marker({ element: el }).setLngLat([sp.lng, sp.lat]).setPopup(popup).addTo(map);
       signageMarkersRef.current.push(m);
     });
-  }, [showSignage]);
+  }, [showSignage, signageQuarter]);
 
   // Cursor
   useEffect(() => {
