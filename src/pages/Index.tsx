@@ -106,9 +106,10 @@ const Index = () => {
               <div className="text-xs text-muted-foreground">{activeCat.description}</div>
             </div>
           )}
-          {/* Simulator + Radar chart */}
+          {/* Radar chart + Simulator (radar on top) */}
           {highlighted && (
             <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 max-h-[calc(100%-2rem)] overflow-auto">
+              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
               <AmenitySimulator
                 segmentCode={highlighted}
                 placedAmenities={placedAmenities}
@@ -118,7 +119,6 @@ const Index = () => {
                 onClearAll={handleClearAll}
                 onClose={() => setHighlighted(null)}
               />
-              <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
             </div>
           )}
         </div>

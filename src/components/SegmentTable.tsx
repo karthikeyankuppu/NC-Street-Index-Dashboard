@@ -23,7 +23,7 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignag
   }, [category]);
 
   return (
-    <div className="overflow-auto max-h-[calc(100vh-280px)]">
+    <div>
       <table className="w-full text-xs">
         <thead>
           <tr className="border-b border-border">
