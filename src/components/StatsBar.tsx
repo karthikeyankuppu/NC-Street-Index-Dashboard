@@ -3,9 +3,11 @@ import { scores, getScoreForCategory, segments, type CategoryKey } from '@/data/
 
 interface StatsBarProps {
   category: CategoryKey;
+  criticalActive?: boolean;
+  onCriticalToggle?: () => void;
 }
 
-const StatsBar = ({ category }: StatsBarProps) => {
+const StatsBar = ({ category, criticalActive, onCriticalToggle }: StatsBarProps) => {
   const stats = useMemo(() => {
     const withGeo = scores.filter(s => {
       const norm = s.code.replace(/[-\s]/g, '').replace(/^(PR|SR|TR)0*/, '$1').toUpperCase();
@@ -22,18 +24,32 @@ const StatsBar = ({ category }: StatsBarProps) => {
     return { avg, min, max, total: values.length, critical, poor };
   }, [category]);
 
+  const items = [
+    { key: 'avg', label: 'Average', value: stats.avg.toFixed(1), color: 'text-primary', clickable: false },
+    { key: 'critical', label: 'Critical', value: stats.critical.toString(), color: 'text-score-critical', clickable: true },
+    { key: 'total', label: 'Segments', value: stats.total.toString(), color: 'text-foreground', clickable: false },
+  ];
+
   return (
     <div className="grid grid-cols-3 gap-3">
-      {[
-        { label: 'Average', value: stats.avg.toFixed(1), color: 'text-primary' },
-        { label: 'Critical', value: stats.critical.toString(), color: 'text-score-critical' },
-        { label: 'Segments', value: stats.total.toString(), color: 'text-foreground' },
-      ].map(stat => (
-        <div key={stat.label} className="bg-card rounded-lg border border-border p-3 text-center">
-          <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
-          <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</div>
-        </div>
-      ))}
+      {items.map(stat => {
+        const isActive = stat.key === 'critical' && criticalActive;
+        const handleClick = stat.clickable ? onCriticalToggle : undefined;
+        return (
+          <button
+            key={stat.label}
+            type="button"
+            onClick={handleClick}
+            disabled={!stat.clickable}
+            className={`bg-card rounded-lg border p-3 text-center transition-all ${
+              stat.clickable ? 'cursor-pointer hover:border-score-critical/60' : 'cursor-default'
+            } ${isActive ? 'border-score-critical ring-2 ring-score-critical/40' : 'border-border'}`}
+          >
+            <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</div>
+          </button>
+        );
+      })}
     </div>
   );
 };
