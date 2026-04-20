@@ -25,6 +25,8 @@ const Index = () => {
   const [showSignage, setShowSignage] = useState(false);
   const [signageQuarter, setSignageQuarter] = useState<number>(1);
   const [is3D, setIs3D] = useState(false);
+  const [showSimulator, setShowSimulator] = useState(false);
+  const [criticalOnly, setCriticalOnly] = useState(false);
 
   const handleSegmentClick = useCallback((code: string | null) => {
     setHighlighted(prev => {
