@@ -25,6 +25,8 @@ const Index = () => {
   const [showSignage, setShowSignage] = useState(false);
   const [signageQuarter, setSignageQuarter] = useState<number>(1);
   const [is3D, setIs3D] = useState(false);
+  const [showSimulator, setShowSimulator] = useState(false);
+  const [criticalOnly, setCriticalOnly] = useState(false);
 
   const handleSegmentClick = useCallback((code: string | null) => {
     setHighlighted(prev => {
@@ -76,6 +78,12 @@ const Index = () => {
             <div className="flex items-center gap-2">
               <Switch id="3d-toggle" checked={is3D} onCheckedChange={setIs3D} />
               <Label htmlFor="3d-toggle" className="text-xs text-muted-foreground cursor-pointer">3D</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
+              <Label htmlFor="sim-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                Urban Amenity Simulation
+              </Label>
             </div>
             <div className="flex items-center gap-2">
               <Tooltip>
@@ -154,15 +162,17 @@ const Index = () => {
           {highlighted && (
             <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 max-h-[calc(100%-2rem)] overflow-auto">
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
-              <AmenitySimulator
-                segmentCode={highlighted}
-                placedAmenities={placedAmenities}
-                activeAmenity={activeAmenity}
-                onSelectAmenity={setActiveAmenity}
-                onRemoveAmenity={handleRemoveAmenity}
-                onClearAll={handleClearAll}
-                onClose={() => setHighlighted(null)}
-              />
+              {showSimulator && (
+                <AmenitySimulator
+                  segmentCode={highlighted}
+                  placedAmenities={placedAmenities}
+                  activeAmenity={activeAmenity}
+                  onSelectAmenity={setActiveAmenity}
+                  onRemoveAmenity={handleRemoveAmenity}
+                  onClearAll={handleClearAll}
+                  onClose={() => setShowSimulator(false)}
+                />
+              )}
             </div>
           )}
           {/* Wayfinding legend (bottom-right) */}
@@ -197,11 +207,23 @@ const Index = () => {
         <aside className="w-80 border-l border-border bg-card overflow-hidden flex flex-col shrink-0 hidden lg:flex">
           <div className="p-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground mb-3">Statistics</h2>
-            <StatsBar category={category} />
+            <StatsBar
+              category={category}
+              criticalActive={criticalOnly}
+              onCriticalToggle={() => setCriticalOnly(v => !v)}
+            />
           </div>
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-            <div className="px-4 pt-3 pb-1 shrink-0">
+            <div className="px-4 pt-3 pb-1 shrink-0 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">Segments</h2>
+              {criticalOnly && (
+                <button
+                  onClick={() => setCriticalOnly(false)}
+                  className="text-[10px] uppercase tracking-wider text-score-critical hover:underline"
+                >
+                  Critical only ✕
+                </button>
+              )}
             </div>
             <div className="flex-1 overflow-auto px-2 min-h-0">
               <SegmentTable
@@ -210,6 +232,7 @@ const Index = () => {
                 onSegmentHover={setHighlighted}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
+                criticalOnly={criticalOnly}
               />
             </div>
           </div>

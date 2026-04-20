@@ -8,9 +8,10 @@ interface SegmentTableProps {
   onSegmentHover: (code: string | null) => void;
   showSignageImpact?: boolean;
   signageQuarter?: number;
+  criticalOnly?: boolean;
 }
 
-const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignageImpact, signageQuarter }: SegmentTableProps) => {
+const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignageImpact, signageQuarter, criticalOnly }: SegmentTableProps) => {
   const signageBySegment = useMemo(() => showSignageImpact ? getSignageBySegment(signageQuarter) : {}, [showSignageImpact, signageQuarter]);
 
   const sortedScores = useMemo(() => {
@@ -20,8 +21,11 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignag
         k.replace(/[-\s]/g, '').replace(/^(PR|SR|TR)0*/, '$1').toUpperCase() === norm
       );
     });
-    return [...withGeo].sort((a, b) => getScoreForCategory(b, category) - getScoreForCategory(a, category));
-  }, [category]);
+    const filtered = criticalOnly
+      ? withGeo.filter(s => getScoreForCategory(s, category) <= 20)
+      : withGeo;
+    return [...filtered].sort((a, b) => getScoreForCategory(b, category) - getScoreForCategory(a, category));
+  }, [category, criticalOnly]);
 
   return (
     <div>
