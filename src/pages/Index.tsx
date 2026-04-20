@@ -80,6 +80,12 @@ const Index = () => {
               <Label htmlFor="3d-toggle" className="text-xs text-muted-foreground cursor-pointer">3D</Label>
             </div>
             <div className="flex items-center gap-2">
+              <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
+              <Label htmlFor="sim-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                Urban Amenity Simulation
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2">
