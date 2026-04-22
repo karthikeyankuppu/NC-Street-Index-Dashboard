@@ -2,24 +2,19 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel } from '@/data/streetData';
-import { AMENITIES } from '@/data/amenities';
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, signageQuarter, is3D, criticalOnly, popupSegment }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
-  const markersRef = useRef([]);
   const signageMarkersRef = useRef([]);
   const tooltipRef = useRef(null);
   const segmentPopupRef = useRef(null);
   const readyRef = useRef(false);
 
   // Stable refs for callbacks used inside map events
-  const stableRefs = useRef({ category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity });
-  stableRefs.current = { category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity };
-
-  // Buffer constant (meters)
-  const BUFFER_METERS = 5;
+  const stableRefs = useRef({ category, highlightedSegment, onSegmentClick });
+  stableRefs.current = { category, highlightedSegment, onSegmentClick };
 
   // Init map once
   useEffect(() => {
@@ -126,27 +121,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
       readyRef.current = true;
     });
 
-    map.on('click', (e) => {
-      if (stableRefs.current.activeAmenity) {
-        const hl = stableRefs.current.highlightedSegment;
-        if (!hl) return;
-        const geos = segments[hl];
-        if (!geos) return;
-        const lng = e.lngLat.lng;
-        const lat = e.lngLat.lat;
-        let minD = Infinity;
-        geos.forEach(g => {
-          const coords = g.coordinates;
-          for (let i = 0; i < coords.length - 1; i++) {
-            const d = distToSegmentMeters(lat, lng, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
-            if (d < minD) minD = d;
-          }
-        });
-        if (minD <= BUFFER_METERS) {
-          stableRefs.current.onPlaceAmenity([lat, lng]);
-        }
-      }
-    });
+    // (Amenity placement on map removed — counts managed in simulator panel)
 
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
@@ -187,88 +162,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
 
   // (Removed segment breakdown popup — info now shown below the radar chart)
 
-  // Buffer around highlighted segment (for amenity placement)
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    const srcId = 'segment-buffer';
-    const fillId = 'segment-buffer-fill';
-    const lineId = 'segment-buffer-outline';
-
-    const cleanup = () => {
-      if (!map.getStyle()) return;
-      if (map.getLayer(lineId)) map.removeLayer(lineId);
-      if (map.getLayer(fillId)) map.removeLayer(fillId);
-      if (map.getSource(srcId)) map.removeSource(srcId);
-    };
-
-    const apply = () => {
-      cleanup();
-      if (!highlightedSegment) return;
-      const geos = segments[highlightedSegment];
-      if (!geos) return;
-
-      const polys = geos.map(g => bufferPolyline(g.coordinates, BUFFER_METERS));
-      const data = {
-        type: 'FeatureCollection',
-        features: polys.map(coords => ({
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'Polygon', coordinates: [coords] },
-        })),
-      };
-      map.addSource(srcId, { type: 'geojson', data });
-      map.addLayer({
-        id: fillId,
-        type: 'fill',
-        source: srcId,
-        paint: { 'fill-color': '#22d3ee', 'fill-opacity': 0.08 },
-      });
-      map.addLayer({
-        id: lineId,
-        type: 'line',
-        source: srcId,
-        paint: {
-          'line-color': '#22d3ee',
-          'line-width': 2,
-          'line-dasharray': [2, 2],
-          'line-opacity': 0.9,
-        },
-      });
-    };
-
-    if (map.isStyleLoaded() && readyRef.current) {
-      apply();
-      return cleanup;
-    }
-    map.once('load', apply);
-    return () => {
-      map.off('load', apply);
-      cleanup();
-    };
-  }, [highlightedSegment]);
-
-  // Amenity markers
-  useEffect(() => {
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
-    const map = mapRef.current;
-    if (!map) return;
-
-    placedAmenities.forEach(p => {
-      const def = AMENITIES.find(a => a.id === p.amenityId);
-      if (!def) return;
-      const el = document.createElement('div');
-      el.style.cssText = 'font-size:20px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));cursor:pointer;text-align:center;line-height:1';
-      el.textContent = def.icon;
-      const m = new maplibregl.Marker({ element: el })
-        .setLngLat([p.latlng[1], p.latlng[0]])
-        .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(`<div style="font-size:12px">${def.icon} ${def.label}</div>`))
-        .addTo(map);
-      markersRef.current.push(m);
-    });
-  }, [placedAmenities]);
+  // (Buffer overlay and amenity map markers removed — amenities are counted in the simulator panel)
 
   // Signage markers
   useEffect(() => {
@@ -295,10 +189,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     });
   }, [showSignage, signageQuarter]);
 
-  // Cursor
-  useEffect(() => {
-    if (containerRef.current) containerRef.current.style.cursor = activeAmenity ? 'crosshair' : '';
-  }, [activeAmenity]);
+  // (Cursor crosshair removed — no on-map placement)
 
   return <div ref={containerRef} className="w-full h-full rounded-lg" />;
 };

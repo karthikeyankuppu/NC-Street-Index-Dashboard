@@ -20,7 +20,6 @@ const Index = () => {
   const [category, setCategory] = useState('index');
   const [highlighted, setHighlighted] = useState(null);
   const [placedAmenities, setPlacedAmenities] = useState([]);
-  const [activeAmenity, setActiveAmenity] = useState(null);
   const [showSignage, setShowSignage] = useState(false);
   const [signageQuarter, setSignageQuarter] = useState(1);
   const [is3D, setIs3D] = useState(false);
@@ -33,7 +32,6 @@ const Index = () => {
       const next = prev === code ? null : code;
       if (!next) {
         setPlacedAmenities([]);
-        setActiveAmenity(null);
       }
       return next;
     });
@@ -41,19 +39,22 @@ const Index = () => {
 
   const handleTableSelect = handleSegmentClick;
 
-  const handlePlaceAmenity = useCallback((latlng) => {
-    if (!activeAmenity) return;
-    const uid = `${activeAmenity}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    setPlacedAmenities(prev => [...prev, { uid, amenityId: activeAmenity, latlng }]);
-  }, [activeAmenity]);
+  const handleIncrementAmenity = useCallback((amenityId) => {
+    const uid = `${amenityId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setPlacedAmenities(prev => [...prev, { uid, amenityId }]);
+  }, []);
 
-  const handleRemoveAmenity = useCallback((uid) => {
-    setPlacedAmenities(prev => prev.filter(p => p.uid !== uid));
+  const handleDecrementAmenity = useCallback((amenityId) => {
+    setPlacedAmenities(prev => {
+      const idx = [...prev].reverse().findIndex(p => p.amenityId === amenityId);
+      if (idx === -1) return prev;
+      const realIdx = prev.length - 1 - idx;
+      return prev.filter((_, i) => i !== realIdx);
+    });
   }, []);
 
   const handleClearAll = useCallback(() => {
     setPlacedAmenities([]);
-    setActiveAmenity(null);
   }, []);
 
   const activeCat = CATEGORIES.find(c => c.key === category);
@@ -157,14 +158,10 @@ const Index = () => {
               category={category}
               highlightedSegment={highlighted || hovered}
               onSegmentClick={handleSegmentClick}
-              placedAmenities={placedAmenities}
-              activeAmenity={activeAmenity}
-              onPlaceAmenity={handlePlaceAmenity}
               showSignage={showSignage}
               signageQuarter={signageQuarter}
               is3D={is3D}
               criticalOnly={criticalOnly}
-              popupSegment={null}
             />
           </div>
           {/* Category info overlay */}
@@ -186,9 +183,8 @@ const Index = () => {
               <AmenitySimulator
                 segmentCode={highlighted}
                 placedAmenities={placedAmenities}
-                activeAmenity={activeAmenity}
-                onSelectAmenity={setActiveAmenity}
-                onRemoveAmenity={handleRemoveAmenity}
+                onIncrement={handleIncrementAmenity}
+                onDecrement={handleDecrementAmenity}
                 onClearAll={handleClearAll}
                 onClose={() => setShowSimulator(false)}
               />
