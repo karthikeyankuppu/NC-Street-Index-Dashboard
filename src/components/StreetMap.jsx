@@ -100,8 +100,6 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
         map.on('click', `seg-${code}`, (e) => {
           e.originalEvent.stopPropagation();
           stableRefs.current.onSegmentClick(code);
-          segmentPopupRef.current?.remove();
-          segmentPopupRef.current = showSegmentPopup(map, code);
         });
 
         map.on('mouseenter', `seg-${code}`, (e) => {
@@ -187,14 +185,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     });
   }, [category, highlightedSegment, criticalOnly]);
 
-  // External popup trigger (e.g., clicking a row in the segments table)
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !readyRef.current || !popupSegment) return;
-    const code = String(popupSegment).includes(':') ? String(popupSegment).split(':').slice(1).join(':') : popupSegment;
-    segmentPopupRef.current?.remove();
-    segmentPopupRef.current = showSegmentPopup(map, code);
-  }, [popupSegment]);
+  // (Removed segment breakdown popup — info now shown below the radar chart)
 
   // Buffer around highlighted segment (for amenity placement)
   useEffect(() => {
