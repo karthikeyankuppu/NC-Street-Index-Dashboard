@@ -170,7 +170,8 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current || !popupSegment) return;
-    showSegmentPopup(map, popupSegment);
+    const code = String(popupSegment).includes(':') ? String(popupSegment).split(':').slice(1).join(':') : popupSegment;
+    showSegmentPopup(map, code);
   }, [popupSegment]);
 
   // Amenity markers
