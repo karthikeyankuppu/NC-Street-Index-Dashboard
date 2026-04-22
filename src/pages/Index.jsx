@@ -87,77 +87,111 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Urban Simulator toggle box */}
-            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
-              <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
-              <Label htmlFor="sim-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
-                Urban Simulator
-              </Label>
+          <div className="flex items-end gap-3 flex-wrap">
+            {/* Current Infra */}
+            <div className="rounded-lg border border-border bg-background/40 px-2.5 pt-1 pb-2">
+              <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1 px-0.5">
+                Current Infra
+              </div>
+              <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+                <Switch id="cur-cam-toggle" checked={showCurrentCameras} onCheckedChange={setShowCurrentCameras} />
+                <Label htmlFor="cur-cam-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
+                  Current Cameras
+                </Label>
+              </div>
             </div>
 
-            {/* Wayfinding toggle box (with optional dropdown inside) */}
-            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2">
-                    <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
-                    <Label htmlFor="signage-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
-                      Wayfinding Masterplan (NayiChaal Saarthi)
-                    </Label>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <div className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
-                    <CalendarDays className="w-3.5 h-3.5" /> Festivals by Quarter
-                  </div>
-                  <div className="space-y-1">
-                    {QUARTERS.map(q => (
-                      <div key={q.id} className="text-[11px]">
-                        <span className="font-semibold">{q.label} ({q.months}):</span>{' '}
-                        <span className="text-muted-foreground">
-                          {q.festivals.length ? q.festivals.join(', ') : '—'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-              {showSignage && (
-                <div className="w-64">
-                  <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
-                    <SelectTrigger className="h-7 w-64 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {QUARTERS.map(q => (
-                        <SelectItem key={q.id} value={String(q.id)} className="text-xs">
-                          {q.label} • {q.months}
-                          {q.festivals.length > 0 && (
-                            <span className="text-muted-foreground"> — {q.festivals.join(', ')}</span>
-                          )}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            {/* Current NayiChaal Infra */}
+            <div className="rounded-lg border border-border bg-background/40 px-2.5 pt-1 pb-2">
+              <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1 px-0.5">
+                Current NayiChaal Infra
+              </div>
+              <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+                <Switch id="nc-cam-toggle" checked={showNayichaalCameras} onCheckedChange={setShowNayichaalCameras} />
+                <Label htmlFor="nc-cam-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
+                  NayiChaal Cameras
+                </Label>
+              </div>
+            </div>
+
+            {/* Future Infra */}
+            <div className="rounded-lg border border-border bg-background/40 px-2.5 pt-1 pb-2">
+              <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1 px-0.5">
+                Future Infra
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Urban Simulator toggle box */}
+                <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+                  <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
+                  <Label htmlFor="sim-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
+                    Urban Simulator
+                  </Label>
                 </div>
-              )}
-            </div>
 
-            {/* 3D toggle box */}
-            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
-              <Switch
-                id="3d-toggle"
-                checked={is3D}
-                onCheckedChange={setIs3D}
-                className={is3D ? '!bg-score-excellent' : ''}
-              />
-              <Label
-                htmlFor="3d-toggle"
-                className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-foreground'}`}
-              >
-                3D
-              </Label>
+                {/* Wayfinding toggle box (with optional dropdown inside) */}
+                <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2">
+                        <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
+                        <Label htmlFor="signage-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
+                          Wayfinding Masterplan (NayiChaal Saarthi)
+                        </Label>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <div className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                        <CalendarDays className="w-3.5 h-3.5" /> Festivals by Quarter
+                      </div>
+                      <div className="space-y-1">
+                        {QUARTERS.map(q => (
+                          <div key={q.id} className="text-[11px]">
+                            <span className="font-semibold">{q.label} ({q.months}):</span>{' '}
+                            <span className="text-muted-foreground">
+                              {q.festivals.length ? q.festivals.join(', ') : '—'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                  {showSignage && (
+                    <div className="w-64">
+                      <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
+                        <SelectTrigger className="h-7 w-64 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {QUARTERS.map(q => (
+                            <SelectItem key={q.id} value={String(q.id)} className="text-xs">
+                              {q.label} • {q.months}
+                              {q.festivals.length > 0 && (
+                                <span className="text-muted-foreground"> — {q.festivals.join(', ')}</span>
+                              )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3D toggle box */}
+                <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+                  <Switch
+                    id="3d-toggle"
+                    checked={is3D}
+                    onCheckedChange={setIs3D}
+                    className={is3D ? '!bg-score-excellent' : ''}
+                  />
+                  <Label
+                    htmlFor="3d-toggle"
+                    className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-foreground'}`}
+                  >
+                    3D
+                  </Label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
