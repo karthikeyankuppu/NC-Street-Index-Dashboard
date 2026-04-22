@@ -131,7 +131,7 @@ const Index = () => {
                 </div>
               )}
             </div>
-            <ScoreLegend />
+            
             <div className="flex items-center gap-2 pl-3 ml-1 border-l border-border">
               <Switch
                 id="3d-toggle"
@@ -196,9 +196,13 @@ const Index = () => {
               )}
             </div>
           )}
-          {/* Wayfinding legend (bottom-left) */}
+          {/* Score legend (bottom-left) */}
+          <div className="absolute bottom-4 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2">
+            <ScoreLegend />
+          </div>
+          {/* Wayfinding legend (bottom-left, stacked above score legend) */}
           {showSignage && (
-            <div className="absolute bottom-4 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
+            <div className="absolute bottom-20 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
               <div className="font-semibold text-foreground mb-1.5">
                 Wayfinding • {QUARTERS.find(q => q.id === signageQuarter)?.label}
               </div>
@@ -250,7 +254,7 @@ const Index = () => {
               <SegmentTable
                 category={category}
                 highlightedSegment={highlighted}
-                onSegmentHover={setHighlighted}
+                onSegmentHover={() => {}}
                 onSegmentClick={handleTableSelect}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
