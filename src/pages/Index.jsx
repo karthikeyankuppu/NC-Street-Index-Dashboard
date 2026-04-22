@@ -257,6 +257,8 @@ const Index = () => {
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
                 criticalOnly={criticalOnly}
+                showSimulator={showSimulator}
+                placedAmenities={placedAmenities}
               />
             </div>
           </div>
