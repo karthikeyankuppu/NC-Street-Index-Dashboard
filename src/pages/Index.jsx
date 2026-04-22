@@ -158,14 +158,10 @@ const Index = () => {
               category={category}
               highlightedSegment={highlighted || hovered}
               onSegmentClick={handleSegmentClick}
-              placedAmenities={placedAmenities}
-              activeAmenity={activeAmenity}
-              onPlaceAmenity={handlePlaceAmenity}
               showSignage={showSignage}
               signageQuarter={signageQuarter}
               is3D={is3D}
               criticalOnly={criticalOnly}
-              popupSegment={null}
             />
           </div>
           {/* Category info overlay */}
