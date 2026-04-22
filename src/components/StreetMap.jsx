@@ -128,7 +128,23 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
 
     map.on('click', (e) => {
       if (stableRefs.current.activeAmenity) {
-        stableRefs.current.onPlaceAmenity([e.lngLat.lat, e.lngLat.lng]);
+        const hl = stableRefs.current.highlightedSegment;
+        if (!hl) return;
+        const geos = segments[hl];
+        if (!geos) return;
+        const lng = e.lngLat.lng;
+        const lat = e.lngLat.lat;
+        let minD = Infinity;
+        geos.forEach(g => {
+          const coords = g.coordinates;
+          for (let i = 0; i < coords.length - 1; i++) {
+            const d = distToSegmentMeters(lat, lng, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+            if (d < minD) minD = d;
+          }
+        });
+        if (minD <= BUFFER_METERS) {
+          stableRefs.current.onPlaceAmenity([lat, lng]);
+        }
       }
     });
 
