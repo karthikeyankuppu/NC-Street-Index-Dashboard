@@ -17,6 +17,9 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
   const stableRefs = useRef({ category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity });
   stableRefs.current = { category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity };
 
+  // Buffer constant (meters)
+  const BUFFER_METERS = 20;
+
   // Init map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
