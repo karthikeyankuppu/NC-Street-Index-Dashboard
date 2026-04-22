@@ -252,7 +252,7 @@ const Index = () => {
               <SegmentTable
                 category={category}
                 highlightedSegment={highlighted}
-                onSegmentHover={() => {}}
+                onSegmentHover={setHovered}
                 onSegmentClick={handleTableSelect}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
