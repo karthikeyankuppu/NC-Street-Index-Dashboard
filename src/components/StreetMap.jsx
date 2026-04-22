@@ -17,6 +17,9 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
   const stableRefs = useRef({ category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity });
   stableRefs.current = { category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity };
 
+  // Buffer constant (meters)
+  const BUFFER_METERS = 20;
+
   // Init map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -125,7 +128,23 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
 
     map.on('click', (e) => {
       if (stableRefs.current.activeAmenity) {
-        stableRefs.current.onPlaceAmenity([e.lngLat.lat, e.lngLat.lng]);
+        const hl = stableRefs.current.highlightedSegment;
+        if (!hl) return;
+        const geos = segments[hl];
+        if (!geos) return;
+        const lng = e.lngLat.lng;
+        const lat = e.lngLat.lat;
+        let minD = Infinity;
+        geos.forEach(g => {
+          const coords = g.coordinates;
+          for (let i = 0; i < coords.length - 1; i++) {
+            const d = distToSegmentMeters(lat, lng, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
+            if (d < minD) minD = d;
+          }
+        });
+        if (minD <= BUFFER_METERS) {
+          stableRefs.current.onPlaceAmenity([lat, lng]);
+        }
       }
     });
 
@@ -173,6 +192,57 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     const code = String(popupSegment).includes(':') ? String(popupSegment).split(':').slice(1).join(':') : popupSegment;
     showSegmentPopup(map, code);
   }, [popupSegment]);
+
+  // Buffer around highlighted segment (for amenity placement)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+
+    const srcId = 'segment-buffer';
+    const fillId = 'segment-buffer-fill';
+    const lineId = 'segment-buffer-outline';
+
+    const cleanup = () => {
+      if (map.getLayer(lineId)) map.removeLayer(lineId);
+      if (map.getLayer(fillId)) map.removeLayer(fillId);
+      if (map.getSource(srcId)) map.removeSource(srcId);
+    };
+
+    cleanup();
+    if (!highlightedSegment) return;
+    const geos = segments[highlightedSegment];
+    if (!geos) return;
+
+    const polys = geos.map(g => bufferPolyline(g.coordinates, BUFFER_METERS));
+    const data = {
+      type: 'FeatureCollection',
+      features: polys.map(coords => ({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: [coords] },
+      })),
+    };
+    map.addSource(srcId, { type: 'geojson', data });
+    map.addLayer({
+      id: fillId,
+      type: 'fill',
+      source: srcId,
+      paint: { 'fill-color': '#22d3ee', 'fill-opacity': 0.08 },
+    });
+    map.addLayer({
+      id: lineId,
+      type: 'line',
+      source: srcId,
+      paint: {
+        'line-color': '#22d3ee',
+        'line-width': 2,
+        'line-dasharray': [2, 2],
+        'line-opacity': 0.9,
+      },
+    });
+
+    return cleanup;
+  }, [highlightedSegment]);
 
   // Amenity markers
   useEffect(() => {
@@ -264,6 +334,67 @@ function showSegmentPopup(map, code) {
       </div>
     </div>
   `).addTo(map);
+}
+
+// Distance from point (lat,lng) to a line segment between two lat/lng points, in meters
+function distToSegmentMeters(lat, lng, lat1, lng1, lat2, lng2) {
+  const toXY = (la, ln) => {
+    const x = ln * 111320 * Math.cos((lat1 * Math.PI) / 180);
+    const y = la * 110540;
+    return [x, y];
+  };
+  const [px, py] = toXY(lat, lng);
+  const [x1, y1] = toXY(lat1, lng1);
+  const [x2, y2] = toXY(lat2, lng2);
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len2 = dx * dx + dy * dy;
+  let t = len2 === 0 ? 0 : ((px - x1) * dx + (py - y1) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = x1 + t * dx;
+  const cy = y1 + t * dy;
+  return Math.hypot(px - cx, py - cy);
+}
+
+// Build a polygon buffer (in lng/lat) around a polyline given as [[lng,lat], ...]
+function bufferPolyline(coords, meters) {
+  if (!coords || coords.length < 2) return [];
+  const lat0 = coords[0][1];
+  const mPerDegLat = 110540;
+  const mPerDegLng = 111320 * Math.cos((lat0 * Math.PI) / 180);
+  const dLat = meters / mPerDegLat;
+  const dLng = meters / mPerDegLng;
+
+  const left = [];
+  const right = [];
+  for (let i = 0; i < coords.length; i++) {
+    const [lng, lat] = coords[i];
+    let nx, ny;
+    if (i === 0) {
+      const [lng2, lat2] = coords[i + 1];
+      nx = lng2 - lng;
+      ny = lat2 - lat;
+    } else if (i === coords.length - 1) {
+      const [lng1, lat1] = coords[i - 1];
+      nx = lng - lng1;
+      ny = lat - lat1;
+    } else {
+      const [lng1, lat1] = coords[i - 1];
+      const [lng2, lat2] = coords[i + 1];
+      nx = lng2 - lng1;
+      ny = lat2 - lat1;
+    }
+    // perpendicular in scaled space
+    const px = -ny * mPerDegLat;
+    const py = nx * mPerDegLng;
+    const len = Math.hypot(px, py) || 1;
+    const ux = px / len;
+    const uy = py / len;
+    left.push([lng + ux * dLng, lat + uy * dLat]);
+    right.push([lng - ux * dLng, lat - uy * dLat]);
+  }
+  // close polygon: left forward + right reversed
+  return [...left, ...right.reverse(), left[0]];
 }
 
 export default StreetMap;
