@@ -121,27 +121,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       readyRef.current = true;
     });
 
-    map.on('click', (e) => {
-      if (stableRefs.current.activeAmenity) {
-        const hl = stableRefs.current.highlightedSegment;
-        if (!hl) return;
-        const geos = segments[hl];
-        if (!geos) return;
-        const lng = e.lngLat.lng;
-        const lat = e.lngLat.lat;
-        let minD = Infinity;
-        geos.forEach(g => {
-          const coords = g.coordinates;
-          for (let i = 0; i < coords.length - 1; i++) {
-            const d = distToSegmentMeters(lat, lng, coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
-            if (d < minD) minD = d;
-          }
-        });
-        if (minD <= BUFFER_METERS) {
-          stableRefs.current.onPlaceAmenity([lat, lng]);
-        }
-      }
-    });
+    // (Amenity placement on map removed — counts managed in simulator panel)
 
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
