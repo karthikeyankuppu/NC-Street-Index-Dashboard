@@ -213,6 +213,8 @@ const Index = () => {
               signageQuarter={signageQuarter}
               is3D={is3D}
               criticalOnly={criticalOnly}
+              showCurrentCameras={showCurrentCameras}
+              showNayichaalCameras={showNayichaalCameras}
             />
           </div>
           {/* Category info overlay */}
