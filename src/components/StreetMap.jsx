@@ -189,10 +189,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
     });
   }, [showSignage, signageQuarter]);
 
-  // Cursor
-  useEffect(() => {
-    if (containerRef.current) containerRef.current.style.cursor = activeAmenity ? 'crosshair' : '';
-  }, [activeAmenity]);
+  // (Cursor crosshair removed — no on-map placement)
 
   return <div ref={containerRef} className="w-full h-full rounded-lg" />;
 };
