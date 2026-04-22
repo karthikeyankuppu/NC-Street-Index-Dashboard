@@ -160,6 +160,8 @@ const Index = () => {
               showSignage={showSignage}
               signageQuarter={signageQuarter}
               is3D={is3D}
+              criticalOnly={criticalOnly}
+              popupSegment={popupTrigger.code ? `${popupTrigger.n}:${popupTrigger.code}` : null}
             />
           </div>
           {/* Category info overlay */}
@@ -241,6 +243,7 @@ const Index = () => {
                 category={category}
                 highlightedSegment={highlighted}
                 onSegmentHover={setHighlighted}
+                onSegmentClick={handleTableSelect}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
                 criticalOnly={criticalOnly}
