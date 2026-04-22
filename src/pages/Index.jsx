@@ -183,9 +183,8 @@ const Index = () => {
               <AmenitySimulator
                 segmentCode={highlighted}
                 placedAmenities={placedAmenities}
-                activeAmenity={activeAmenity}
-                onSelectAmenity={setActiveAmenity}
-                onRemoveAmenity={handleRemoveAmenity}
+                onIncrement={handleIncrementAmenity}
+                onDecrement={handleDecrementAmenity}
                 onClearAll={handleClearAll}
                 onClose={() => setShowSimulator(false)}
               />
