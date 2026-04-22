@@ -2,24 +2,19 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel } from '@/data/streetData';
-import { AMENITIES } from '@/data/amenities';
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, signageQuarter, is3D, criticalOnly, popupSegment }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
-  const markersRef = useRef([]);
   const signageMarkersRef = useRef([]);
   const tooltipRef = useRef(null);
   const segmentPopupRef = useRef(null);
   const readyRef = useRef(false);
 
   // Stable refs for callbacks used inside map events
-  const stableRefs = useRef({ category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity });
-  stableRefs.current = { category, highlightedSegment, onSegmentClick, activeAmenity, onPlaceAmenity };
-
-  // Buffer constant (meters)
-  const BUFFER_METERS = 5;
+  const stableRefs = useRef({ category, highlightedSegment, onSegmentClick });
+  stableRefs.current = { category, highlightedSegment, onSegmentClick };
 
   // Init map once
   useEffect(() => {
