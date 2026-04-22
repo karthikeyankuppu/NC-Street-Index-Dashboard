@@ -11,6 +11,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
   const markersRef = useRef([]);
   const signageMarkersRef = useRef([]);
   const tooltipRef = useRef(null);
+  const segmentPopupRef = useRef(null);
   const readyRef = useRef(false);
 
   // Stable refs for callbacks used inside map events
@@ -99,7 +100,8 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
         map.on('click', `seg-${code}`, (e) => {
           e.originalEvent.stopPropagation();
           stableRefs.current.onSegmentClick(code);
-          showSegmentPopup(map, code);
+          segmentPopupRef.current?.remove();
+          segmentPopupRef.current = showSegmentPopup(map, code);
         });
 
         map.on('mouseenter', `seg-${code}`, (e) => {
@@ -190,7 +192,8 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     const map = mapRef.current;
     if (!map || !readyRef.current || !popupSegment) return;
     const code = String(popupSegment).includes(':') ? String(popupSegment).split(':').slice(1).join(':') : popupSegment;
-    showSegmentPopup(map, code);
+    segmentPopupRef.current?.remove();
+    segmentPopupRef.current = showSegmentPopup(map, code);
   }, [popupSegment]);
 
   // Buffer around highlighted segment (for amenity placement)
@@ -336,7 +339,7 @@ function showSegmentPopup(map, code) {
     </div>
   `).join('');
 
-  new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setLngLat([cLng, cLat]).setHTML(`
+  return new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setLngLat([cLng, cLat]).setHTML(`
     <div style="font-family:system-ui;min-width:220px;background:#1f2937;color:#e5e7eb;padding:10px 12px;border-radius:8px;border:1px solid #374151">
       <strong style="font-size:13px;color:#fff">${label}</strong>
       <div style="margin-top:6px">${rowsHtml}</div>
