@@ -41,7 +41,7 @@ const AmenitySimulator = ({
       <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
-          <span className="text-sm font-bold text-foreground">Urban Amenity Simulation</span>
+          <span className="text-sm font-bold text-foreground">Urban Simulator</span>
         </div>
         <div className="flex items-center gap-1">
           {totalPlaced > 0 && (
