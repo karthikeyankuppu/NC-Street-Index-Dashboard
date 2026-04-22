@@ -26,6 +26,16 @@ const Index = () => {
   const [is3D, setIs3D] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
   const [criticalOnly, setCriticalOnly] = useState(false);
+  const [popupTrigger, setPopupTrigger] = useState({ code: null, n: 0 });
+
+  const triggerPopup = useCallback((code) => {
+    setPopupTrigger(prev => ({ code, n: prev.n + 1 }));
+  }, []);
+
+  const handleTableSelect = useCallback((code) => {
+    setHighlighted(code);
+    triggerPopup(code);
+  }, [triggerPopup]);
 
   const handleSegmentClick = useCallback((code) => {
     setHighlighted(prev => {
@@ -150,6 +160,8 @@ const Index = () => {
               showSignage={showSignage}
               signageQuarter={signageQuarter}
               is3D={is3D}
+              criticalOnly={criticalOnly}
+              popupSegment={popupTrigger.code ? `${popupTrigger.n}:${popupTrigger.code}` : null}
             />
           </div>
           {/* Category info overlay */}
@@ -231,6 +243,7 @@ const Index = () => {
                 category={category}
                 highlightedSegment={highlighted}
                 onSegmentHover={setHighlighted}
+                onSegmentClick={handleTableSelect}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
                 criticalOnly={criticalOnly}
