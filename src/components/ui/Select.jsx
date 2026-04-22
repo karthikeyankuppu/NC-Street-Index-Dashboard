@@ -80,8 +80,7 @@ export const SelectContent = ({ className, children }) => {
 export const SelectItem = ({ value, className, children }) => {
   const { value: selected, onValueChange, setOpen, registerLabel } = useContext(SelectCtx);
   useEffect(() => {
-    if (typeof children === 'string') registerLabel(value, children);
-    else registerLabel(value, String(children));
+    registerLabel(value, childrenToText(children));
   }, [value, children]);
   const isSelected = selected === value;
   return (
