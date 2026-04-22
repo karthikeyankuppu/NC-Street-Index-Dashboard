@@ -3,11 +3,14 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel } from '@/data/streetData';
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
+import { CURRENT_CAMERAS, NAYICHAAL_CAMERAS } from '@/data/cameraData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly, showCurrentCameras, showNayichaalCameras }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const signageMarkersRef = useRef([]);
+  const currentCamMarkersRef = useRef([]);
+  const nayichaalCamMarkersRef = useRef([]);
   const tooltipRef = useRef(null);
   const segmentPopupRef = useRef(null);
   const readyRef = useRef(false);
@@ -190,6 +193,42 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
   }, [showSignage, signageQuarter]);
 
   // (Cursor crosshair removed — no on-map placement)
+
+  // Current Infra cameras (Camera_locs_godowlia)
+  useEffect(() => {
+    currentCamMarkersRef.current.forEach(m => m.remove());
+    currentCamMarkersRef.current = [];
+    const map = mapRef.current;
+    if (!map || !showCurrentCameras) return;
+
+    CURRENT_CAMERAS.forEach(cam => {
+      const el = document.createElement('div');
+      el.style.cssText = 'width:14px;height:14px;border-radius:50%;background:#f59e0b;border:2px solid white;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.6)';
+      const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">Current Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#888;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
+      );
+      const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
+      currentCamMarkersRef.current.push(m);
+    });
+  }, [showCurrentCameras]);
+
+  // NayiChaal Infra cameras
+  useEffect(() => {
+    nayichaalCamMarkersRef.current.forEach(m => m.remove());
+    nayichaalCamMarkersRef.current = [];
+    const map = mapRef.current;
+    if (!map || !showNayichaalCameras) return;
+
+    NAYICHAAL_CAMERAS.forEach(cam => {
+      const el = document.createElement('div');
+      el.style.cssText = 'width:14px;height:14px;border-radius:50%;background:#06b6d4;border:2px solid white;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.6)';
+      const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#888;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
+      );
+      const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
+      nayichaalCamMarkersRef.current.push(m);
+    });
+  }, [showNayichaalCameras]);
 
   return <div ref={containerRef} className="w-full h-full rounded-lg" />;
 };
