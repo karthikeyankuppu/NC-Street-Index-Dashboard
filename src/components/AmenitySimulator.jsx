@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { getSegmentScore, getScoreColor, getScoreLabel, getSegmentLabel } from '@/data/streetData';
-import { AMENITIES, applyPlacedAmenities, countAmenities } from '@/data/amenities';
+import { AMENITIES, AMENITY_CATEGORIES, applyPlacedAmenities, countAmenities } from '@/data/amenities';
 import { X, TrendingUp, Trash2, Plus, Minus } from 'lucide-react';
 
 const AmenitySimulator = ({
@@ -98,38 +98,51 @@ const AmenitySimulator = ({
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">
           Add or remove amenities
         </p>
-        <div className="space-y-1.5">
-          {AMENITIES.map(a => {
-            const count = counts[a.id] || 0;
-            const active = count > 0;
+        <div className="space-y-3">
+          {AMENITY_CATEGORIES.map(cat => {
+            const items = AMENITIES.filter(a => a.category === cat.id);
+            if (items.length === 0) return null;
             return (
-              <div
-                key={a.id}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs transition-all ${
-                  active
-                    ? 'border-primary/50 bg-primary/5 text-foreground'
-                    : 'border-border bg-muted/30 text-muted-foreground'
-                }`}
-              >
-                <span className="text-base shrink-0">{a.icon}</span>
-                <span className="font-medium truncate flex-1">{a.label}</span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={() => onDecrement(a.id)}
-                    disabled={count === 0}
-                    className="w-6 h-6 rounded-md border border-border bg-background hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-foreground"
-                    aria-label={`Decrement ${a.label}`}
-                  >
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-6 text-center font-mono font-semibold text-foreground">{count}</span>
-                  <button
-                    onClick={() => onIncrement(a.id)}
-                    className="w-6 h-6 rounded-md border border-primary/40 bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary"
-                    aria-label={`Increment ${a.label}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                  </button>
+              <div key={cat.id}>
+                <p className="text-[10px] font-semibold text-foreground/70 uppercase tracking-wider mb-1.5 px-0.5">
+                  {cat.label}
+                </p>
+                <div className="space-y-1.5">
+                  {items.map(a => {
+                    const count = counts[a.id] || 0;
+                    const active = count > 0;
+                    return (
+                      <div
+                        key={a.id}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs transition-all ${
+                          active
+                            ? 'border-primary/50 bg-primary/5 text-foreground'
+                            : 'border-border bg-muted/30 text-muted-foreground'
+                        }`}
+                      >
+                        <span className="text-base shrink-0">{a.icon}</span>
+                        <span className="font-medium truncate flex-1">{a.label}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => onDecrement(a.id)}
+                            disabled={count === 0}
+                            className="w-6 h-6 rounded-md border border-border bg-background hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-foreground"
+                            aria-label={`Decrement ${a.label}`}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center font-mono font-semibold text-foreground">{count}</span>
+                          <button
+                            onClick={() => onIncrement(a.id)}
+                            className="w-6 h-6 rounded-md border border-primary/40 bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary"
+                            aria-label={`Increment ${a.label}`}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
