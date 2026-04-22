@@ -194,6 +194,13 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
 
   // (Cursor crosshair removed — no on-map placement)
 
+  // Camera icon SVG (lucide camera) — fill via currentColor on the wrapper
+  const cameraIconSvg = (color) => `
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="background:${color};border:2px solid white;border-radius:6px;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.6)">
+      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+      <circle cx="12" cy="13" r="3"/>
+    </svg>`;
+
   // Current Infra cameras (Camera_locs_godowlia)
   useEffect(() => {
     currentCamMarkersRef.current.forEach(m => m.remove());
@@ -203,7 +210,8 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
 
     CURRENT_CAMERAS.forEach(cam => {
       const el = document.createElement('div');
-      el.style.cssText = 'width:14px;height:14px;border-radius:50%;background:#f59e0b;border:2px solid white;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.6)';
+      el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
+      el.innerHTML = cameraIconSvg('#f59e0b');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
         `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">Current Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#888;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
       );
@@ -221,7 +229,8 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
 
     NAYICHAAL_CAMERAS.forEach(cam => {
       const el = document.createElement('div');
-      el.style.cssText = 'width:14px;height:14px;border-radius:50%;background:#06b6d4;border:2px solid white;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.6)';
+      el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
+      el.innerHTML = cameraIconSvg('#06b6d4');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
         `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#888;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
       );
