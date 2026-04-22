@@ -202,19 +202,14 @@ const Index = () => {
                         </p>
                       </div>
                     )}
-                    {levers.length > 0 && (
+                    {levers && (
                       <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-2">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
                           Urban Improvement Levers
                         </p>
-                        <ul className="space-y-1.5">
-                          {levers.map(a => (
-                            <li key={a.id} className="flex items-center gap-2 text-xs font-bold text-foreground">
-                              <span className="text-base shrink-0">{a.icon}</span>
-                              <span>{a.label}</span>
-                            </li>
-                          ))}
-                        </ul>
+                        <p className="text-xs text-foreground leading-relaxed font-bold">
+                          {levers}
+                        </p>
                       </div>
                     )}
                   </>
@@ -239,9 +234,9 @@ const Index = () => {
           <div className="absolute bottom-4 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2">
             <ScoreLegend />
           </div>
-          {/* Wayfinding legend (bottom-left, stacked above score legend) */}
+          {/* Wayfinding legend (bottom-right to avoid overlap with left-side panels) */}
           {showSignage && (
-            <div className="absolute bottom-20 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
+            <div className="absolute bottom-4 right-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
               <div className="font-semibold text-foreground mb-1.5">
                 Wayfinding • {QUARTERS.find(q => q.id === signageQuarter)?.label}
               </div>
