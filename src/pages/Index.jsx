@@ -26,11 +26,7 @@ const Index = () => {
   const [is3D, setIs3D] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
   const [criticalOnly, setCriticalOnly] = useState(false);
-  const [popupTrigger, setPopupTrigger] = useState({ code: null, n: 0 });
-
-  const triggerPopup = useCallback((code) => {
-    setPopupTrigger(prev => ({ code, n: prev.n + 1 }));
-  }, []);
+  const [hovered, setHovered] = useState(null);
 
   const handleSegmentClick = useCallback((code) => {
     setHighlighted(prev => {
@@ -41,8 +37,7 @@ const Index = () => {
       }
       return next;
     });
-    triggerPopup(code);
-  }, [triggerPopup]);
+  }, []);
 
   const handleTableSelect = handleSegmentClick;
 
@@ -160,7 +155,7 @@ const Index = () => {
           <div className="absolute inset-0 p-2">
             <StreetMap
               category={category}
-              highlightedSegment={highlighted}
+              highlightedSegment={highlighted || hovered}
               onSegmentClick={handleSegmentClick}
               placedAmenities={placedAmenities}
               activeAmenity={activeAmenity}
@@ -169,7 +164,7 @@ const Index = () => {
               signageQuarter={signageQuarter}
               is3D={is3D}
               criticalOnly={criticalOnly}
-              popupSegment={popupTrigger.code ? `${popupTrigger.n}:${popupTrigger.code}` : null}
+              popupSegment={null}
             />
           </div>
           {/* Category info overlay */}
@@ -179,21 +174,24 @@ const Index = () => {
               <div className="text-xs text-muted-foreground">{activeCat.description}</div>
             </div>
           )}
-          {/* Radar chart + Simulator (radar on top) */}
+          {/* Radar chart (top-left) */}
           {highlighted && (
-            <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 max-h-[calc(100%-2rem)] overflow-auto">
+            <div className="absolute top-4 left-4 z-[1000] w-[260px] max-h-[calc(100%-2rem)] overflow-auto">
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
-              {showSimulator && (
-                <AmenitySimulator
-                  segmentCode={highlighted}
-                  placedAmenities={placedAmenities}
-                  activeAmenity={activeAmenity}
-                  onSelectAmenity={setActiveAmenity}
-                  onRemoveAmenity={handleRemoveAmenity}
-                  onClearAll={handleClearAll}
-                  onClose={() => setShowSimulator(false)}
-                />
-              )}
+            </div>
+          )}
+          {/* Urban Simulator (top-right) */}
+          {highlighted && showSimulator && (
+            <div className="absolute top-4 right-4 z-[1000] w-[300px] max-h-[calc(100%-2rem)] overflow-auto">
+              <AmenitySimulator
+                segmentCode={highlighted}
+                placedAmenities={placedAmenities}
+                activeAmenity={activeAmenity}
+                onSelectAmenity={setActiveAmenity}
+                onRemoveAmenity={handleRemoveAmenity}
+                onClearAll={handleClearAll}
+                onClose={() => setShowSimulator(false)}
+              />
             </div>
           )}
           {/* Score legend (bottom-left) */}
@@ -254,7 +252,7 @@ const Index = () => {
               <SegmentTable
                 category={category}
                 highlightedSegment={highlighted}
-                onSegmentHover={() => {}}
+                onSegmentHover={setHovered}
                 onSegmentClick={handleTableSelect}
                 showSignageImpact={showSignage}
                 signageQuarter={signageQuarter}
