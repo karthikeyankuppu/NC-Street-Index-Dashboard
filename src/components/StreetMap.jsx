@@ -5,7 +5,7 @@ import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScore
 import { AMENITIES } from '@/data/amenities';
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, signageQuarter, is3D }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmenities, activeAmenity, onPlaceAmenity, showSignage, signageQuarter, is3D, criticalOnly, popupSegment }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -143,7 +143,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     }
   }, [is3D]);
 
-  // Update segment paint on category/highlight change
+  // Update segment paint on category/highlight/criticalOnly change
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
@@ -156,11 +156,22 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
       const v = getScoreForCategory(sd, category);
       const col = getScoreColor(v);
       const hl = highlightedSegment === code;
+      const isCritical = v <= 20;
+      const dimmedByCritical = criticalOnly && !isCritical;
+      const dimmedByHighlight = highlightedSegment && !hl;
+      const dimmed = dimmedByCritical || dimmedByHighlight;
       map.setPaintProperty(lid, 'line-color', col);
-      map.setPaintProperty(lid, 'line-width', hl ? 7 : 4);
-      map.setPaintProperty(lid, 'line-opacity', highlightedSegment && !hl ? 0.3 : 0.9);
+      map.setPaintProperty(lid, 'line-width', hl ? 7 : (criticalOnly && isCritical ? 6 : 4));
+      map.setPaintProperty(lid, 'line-opacity', dimmed ? 0.15 : 0.95);
     });
-  }, [category, highlightedSegment]);
+  }, [category, highlightedSegment, criticalOnly]);
+
+  // External popup trigger (e.g., clicking a row in the segments table)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current || !popupSegment) return;
+    showSegmentPopup(map, popupSegment);
+  }, [popupSegment]);
 
   // Amenity markers
   useEffect(() => {
