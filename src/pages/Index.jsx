@@ -85,13 +85,9 @@ const Index = () => {
           <div className="flex items-center gap-4">
             {/* Toggles */}
             <div className="flex items-center gap-2">
-              <Switch id="3d-toggle" checked={is3D} onCheckedChange={setIs3D} />
-              <Label htmlFor="3d-toggle" className="text-xs text-muted-foreground cursor-pointer">3D</Label>
-            </div>
-            <div className="flex items-center gap-2">
               <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
               <Label htmlFor="sim-toggle" className="text-xs text-muted-foreground cursor-pointer">
-                Urban Amenity Simulation
+                Urban Simulator
               </Label>
             </div>
             <div className="flex items-center gap-2">
