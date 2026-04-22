@@ -85,20 +85,22 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            {/* Toggles */}
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Urban Simulator toggle box */}
+            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
               <Switch id="sim-toggle" checked={showSimulator} onCheckedChange={setShowSimulator} />
-              <Label htmlFor="sim-toggle" className="text-xs text-muted-foreground cursor-pointer">
+              <Label htmlFor="sim-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
                 Urban Simulator
               </Label>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Wayfinding toggle box (with optional dropdown inside) */}
+            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2">
                     <Switch id="signage-toggle" checked={showSignage} onCheckedChange={setShowSignage} />
-                    <Label htmlFor="signage-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                    <Label htmlFor="signage-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
                       Wayfinding Masterplan (NayiChaal Saarthi)
                     </Label>
                   </div>
@@ -139,8 +141,9 @@ const Index = () => {
                 </div>
               )}
             </div>
-            
-            <div className="flex items-center gap-2 pl-3 ml-1 border-l border-border">
+
+            {/* 3D toggle box */}
+            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
               <Switch
                 id="3d-toggle"
                 checked={is3D}
@@ -149,7 +152,7 @@ const Index = () => {
               />
               <Label
                 htmlFor="3d-toggle"
-                className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-muted-foreground'}`}
+                className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-foreground'}`}
               >
                 3D
               </Label>
