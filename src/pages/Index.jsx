@@ -120,15 +120,18 @@ const Index = () => {
                 </TooltipContent>
               </Tooltip>
               {showSignage && (
-                <div className="w-44">
+                <div className="w-64">
                   <Select value={String(signageQuarter)} onValueChange={(v) => setSignageQuarter(Number(v))}>
-                    <SelectTrigger className="h-7 w-44 text-xs">
+                    <SelectTrigger className="h-7 w-64 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {QUARTERS.map(q => (
                         <SelectItem key={q.id} value={String(q.id)} className="text-xs">
                           {q.label} • {q.months}
+                          {q.festivals.length > 0 && (
+                            <span className="text-muted-foreground"> — {q.festivals.join(', ')}</span>
+                          )}
                         </SelectItem>
                       ))}
                     </SelectContent>
