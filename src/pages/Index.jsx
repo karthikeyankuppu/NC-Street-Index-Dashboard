@@ -9,6 +9,7 @@ import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
 
 import { CATEGORIES } from '@/data/streetData';
+import { getSegmentCommentary } from '@/data/segmentCommentary';
 import { QUARTERS, SIGNAGE_CATEGORIES, SIGNAGE_POINTS } from '@/data/signageData';
 import { Switch } from '@/components/ui/Switch';
 import { Label } from '@/components/ui/Label';
@@ -19,7 +20,8 @@ import { CalendarDays } from 'lucide-react';
 const Index = () => {
   const [category, setCategory] = useState('index');
   const [highlighted, setHighlighted] = useState(null);
-  const [placedAmenities, setPlacedAmenities] = useState([]);
+  // Per-segment amenities map: { [segmentCode]: [{ uid, amenityId }, ...] }
+  const [amenitiesBySegment, setAmenitiesBySegment] = useState({});
   const [showSignage, setShowSignage] = useState(false);
   const [signageQuarter, setSignageQuarter] = useState(1);
   const [is3D, setIs3D] = useState(false);
@@ -27,35 +29,42 @@ const Index = () => {
   const [criticalOnly, setCriticalOnly] = useState(false);
   const [hovered, setHovered] = useState(null);
 
+  const placedAmenities = highlighted ? (amenitiesBySegment[highlighted] || []) : [];
+
   const handleSegmentClick = useCallback((code) => {
-    setHighlighted(prev => {
-      const next = prev === code ? null : code;
-      if (!next) {
-        setPlacedAmenities([]);
-      }
-      return next;
-    });
+    // Toggle highlight; preserve placed amenities for that segment
+    setHighlighted(prev => (prev === code ? null : code));
   }, []);
 
   const handleTableSelect = handleSegmentClick;
 
   const handleIncrementAmenity = useCallback((amenityId) => {
+    if (!highlighted) return;
     const uid = `${amenityId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    setPlacedAmenities(prev => [...prev, { uid, amenityId }]);
-  }, []);
+    setAmenitiesBySegment(prev => ({
+      ...prev,
+      [highlighted]: [...(prev[highlighted] || []), { uid, amenityId }],
+    }));
+  }, [highlighted]);
 
   const handleDecrementAmenity = useCallback((amenityId) => {
-    setPlacedAmenities(prev => {
-      const idx = [...prev].reverse().findIndex(p => p.amenityId === amenityId);
+    if (!highlighted) return;
+    setAmenitiesBySegment(prev => {
+      const list = prev[highlighted] || [];
+      const idx = [...list].reverse().findIndex(p => p.amenityId === amenityId);
       if (idx === -1) return prev;
-      const realIdx = prev.length - 1 - idx;
-      return prev.filter((_, i) => i !== realIdx);
+      const realIdx = list.length - 1 - idx;
+      return {
+        ...prev,
+        [highlighted]: list.filter((_, i) => i !== realIdx),
+      };
     });
-  }, []);
+  }, [highlighted]);
 
   const handleClearAll = useCallback(() => {
-    setPlacedAmenities([]);
-  }, []);
+    if (!highlighted) return;
+    setAmenitiesBySegment(prev => ({ ...prev, [highlighted]: [] }));
+  }, [highlighted]);
 
   const activeCat = CATEGORIES.find(c => c.key === category);
 
