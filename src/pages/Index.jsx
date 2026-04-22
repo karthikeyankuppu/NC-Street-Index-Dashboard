@@ -176,22 +176,23 @@ const Index = () => {
                   )}
                 </div>
 
-                {/* 3D toggle box */}
-                <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
-                  <Switch
-                    id="3d-toggle"
-                    checked={is3D}
-                    onCheckedChange={setIs3D}
-                    className={is3D ? '!bg-score-excellent' : ''}
-                  />
-                  <Label
-                    htmlFor="3d-toggle"
-                    className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-foreground'}`}
-                  >
-                    3D
-                  </Label>
-                </div>
               </div>
+            </div>
+
+            {/* 3D toggle box (standalone) */}
+            <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
+              <Switch
+                id="3d-toggle"
+                checked={is3D}
+                onCheckedChange={setIs3D}
+                className={is3D ? '!bg-score-excellent' : ''}
+              />
+              <Label
+                htmlFor="3d-toggle"
+                className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-foreground'}`}
+              >
+                3D
+              </Label>
             </div>
           </div>
         </div>
