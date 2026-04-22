@@ -134,6 +134,20 @@ const Index = () => {
               )}
             </div>
             <ScoreLegend />
+            <div className="flex items-center gap-2 pl-3 ml-1 border-l border-border">
+              <Switch
+                id="3d-toggle"
+                checked={is3D}
+                onCheckedChange={setIs3D}
+                className={is3D ? '!bg-score-excellent' : ''}
+              />
+              <Label
+                htmlFor="3d-toggle"
+                className={`text-xs cursor-pointer font-semibold ${is3D ? 'text-score-excellent' : 'text-muted-foreground'}`}
+              >
+                3D
+              </Label>
+            </div>
           </div>
         </div>
         <div className="mt-3">
