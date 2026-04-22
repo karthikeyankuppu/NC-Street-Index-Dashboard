@@ -28,6 +28,15 @@ export const Select = ({ value, onValueChange, children }) => {
   );
 };
 
+// Recursively extract plain text from React children
+const childrenToText = (node) => {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(childrenToText).join('');
+  if (typeof node === 'object' && node.props) return childrenToText(node.props.children);
+  return '';
+};
+
 export const SelectTrigger = ({ className, children }) => {
   const { open, setOpen } = useContext(SelectCtx);
   return (
