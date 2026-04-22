@@ -336,4 +336,65 @@ function showSegmentPopup(map, code) {
   `).addTo(map);
 }
 
+// Distance from point (lat,lng) to a line segment between two lat/lng points, in meters
+function distToSegmentMeters(lat, lng, lat1, lng1, lat2, lng2) {
+  const toXY = (la, ln) => {
+    const x = ln * 111320 * Math.cos((lat1 * Math.PI) / 180);
+    const y = la * 110540;
+    return [x, y];
+  };
+  const [px, py] = toXY(lat, lng);
+  const [x1, y1] = toXY(lat1, lng1);
+  const [x2, y2] = toXY(lat2, lng2);
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len2 = dx * dx + dy * dy;
+  let t = len2 === 0 ? 0 : ((px - x1) * dx + (py - y1) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = x1 + t * dx;
+  const cy = y1 + t * dy;
+  return Math.hypot(px - cx, py - cy);
+}
+
+// Build a polygon buffer (in lng/lat) around a polyline given as [[lng,lat], ...]
+function bufferPolyline(coords, meters) {
+  if (!coords || coords.length < 2) return [];
+  const lat0 = coords[0][1];
+  const mPerDegLat = 110540;
+  const mPerDegLng = 111320 * Math.cos((lat0 * Math.PI) / 180);
+  const dLat = meters / mPerDegLat;
+  const dLng = meters / mPerDegLng;
+
+  const left = [];
+  const right = [];
+  for (let i = 0; i < coords.length; i++) {
+    const [lng, lat] = coords[i];
+    let nx, ny;
+    if (i === 0) {
+      const [lng2, lat2] = coords[i + 1];
+      nx = lng2 - lng;
+      ny = lat2 - lat;
+    } else if (i === coords.length - 1) {
+      const [lng1, lat1] = coords[i - 1];
+      nx = lng - lng1;
+      ny = lat - lat1;
+    } else {
+      const [lng1, lat1] = coords[i - 1];
+      const [lng2, lat2] = coords[i + 1];
+      nx = lng2 - lng1;
+      ny = lat2 - lat1;
+    }
+    // perpendicular in scaled space
+    const px = -ny * mPerDegLat;
+    const py = nx * mPerDegLng;
+    const len = Math.hypot(px, py) || 1;
+    const ux = px / len;
+    const uy = py / len;
+    left.push([lng + ux * dLng, lat + uy * dLat]);
+    right.push([lng - ux * dLng, lat - uy * dLat]);
+  }
+  // close polygon: left forward + right reversed
+  return [...left, ...right.reverse(), left[0]];
+}
+
 export default StreetMap;
