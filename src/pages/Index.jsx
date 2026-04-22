@@ -32,11 +32,6 @@ const Index = () => {
     setPopupTrigger(prev => ({ code, n: prev.n + 1 }));
   }, []);
 
-  const handleTableSelect = useCallback((code) => {
-    setHighlighted(code);
-    triggerPopup(code);
-  }, [triggerPopup]);
-
   const handleSegmentClick = useCallback((code) => {
     setHighlighted(prev => {
       const next = prev === code ? null : code;
@@ -46,7 +41,10 @@ const Index = () => {
       }
       return next;
     });
-  }, []);
+    triggerPopup(code);
+  }, [triggerPopup]);
+
+  const handleTableSelect = handleSegmentClick;
 
   const handlePlaceAmenity = useCallback((latlng) => {
     if (!activeAmenity) return;
@@ -198,9 +196,9 @@ const Index = () => {
               )}
             </div>
           )}
-          {/* Wayfinding legend (bottom-right) */}
+          {/* Wayfinding legend (bottom-left) */}
           {showSignage && (
-            <div className="absolute bottom-4 right-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
+            <div className="absolute bottom-4 left-4 z-[1000] bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-3 py-2.5 text-xs max-w-[220px]">
               <div className="font-semibold text-foreground mb-1.5">
                 Wayfinding • {QUARTERS.find(q => q.id === signageQuarter)?.label}
               </div>
