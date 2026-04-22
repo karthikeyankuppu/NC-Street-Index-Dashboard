@@ -27,6 +27,8 @@ const Index = () => {
   const [is3D, setIs3D] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
   const [criticalOnly, setCriticalOnly] = useState(false);
+  const [showCurrentCameras, setShowCurrentCameras] = useState(false);
+  const [showNayichaalCameras, setShowNayichaalCameras] = useState(false);
   const [hovered, setHovered] = useState(null);
 
   const placedAmenities = highlighted ? (amenitiesBySegment[highlighted] || []) : [];
@@ -75,7 +77,7 @@ const Index = () => {
       <header className="border-b border-border bg-card px-4 py-3 shrink-0">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <img src={nayichaalLogo} alt="NayiChaal" className="h-10 w-auto" />
+            <img src={nayichaalLogo} alt="NayiChaal" className="h-12 w-auto" />
             <div>
               <h1 className="text-lg font-bold text-foreground tracking-tight">
                 NayiChaal Street Index

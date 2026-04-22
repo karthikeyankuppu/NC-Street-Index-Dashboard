@@ -50,7 +50,7 @@ const SegmentTable = ({
         <thead>
           <tr className="border-b border-border">
             <th className="text-left py-2 px-2 text-muted-foreground font-medium">Segment</th>
-            <th className="text-right py-2 px-2 text-muted-foreground font-medium">Score</th>
+            <th className="text-right py-2 px-2 text-muted-foreground font-medium whitespace-nowrap">Current Score</th>
             {showProjectedColumn && (
               <th className="text-right py-2 px-2 text-muted-foreground font-medium whitespace-nowrap">
                 {projectedColumnLabel}
