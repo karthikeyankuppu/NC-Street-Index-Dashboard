@@ -182,7 +182,7 @@ const Index = () => {
           )}
           {/* Urban Simulator (top-right) */}
           {highlighted && showSimulator && (
-            <div className="absolute top-4 right-4 z-[1000] w-[300px] max-h-[calc(100%-2rem)] overflow-auto">
+            <div className="absolute top-4 right-4 z-[1000] w-[340px] max-h-[calc(100%-2rem)]">
               <AmenitySimulator
                 segmentCode={highlighted}
                 placedAmenities={placedAmenities}
