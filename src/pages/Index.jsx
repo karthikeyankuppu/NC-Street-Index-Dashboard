@@ -9,7 +9,7 @@ import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
 
 import { CATEGORIES } from '@/data/streetData';
-import { getSegmentCommentary } from '@/data/segmentCommentary';
+import { getSegmentCommentary, getImprovementLevers } from '@/data/segmentCommentary';
 import { QUARTERS, SIGNAGE_CATEGORIES, SIGNAGE_POINTS } from '@/data/signageData';
 import { Switch } from '@/components/ui/Switch';
 import { Label } from '@/components/ui/Label';
@@ -189,16 +189,35 @@ const Index = () => {
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
               {(() => {
                 const commentary = getSegmentCommentary(highlighted);
-                if (!commentary) return null;
+                const levers = getImprovementLevers(highlighted);
                 return (
-                  <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">
-                      Insight
-                    </p>
-                    <p className="text-xs text-foreground leading-relaxed">
-                      {commentary}
-                    </p>
-                  </div>
+                  <>
+                    {commentary && (
+                      <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
+                          Insight
+                        </p>
+                        <p className="text-xs text-foreground leading-relaxed font-bold">
+                          {commentary}
+                        </p>
+                      </div>
+                    )}
+                    {levers.length > 0 && (
+                      <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-2">
+                          Urban Improvement Levers
+                        </p>
+                        <ul className="space-y-1.5">
+                          {levers.map(a => (
+                            <li key={a.id} className="flex items-center gap-2 text-xs font-bold text-foreground">
+                              <span className="text-base shrink-0">{a.icon}</span>
+                              <span>{a.label}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
                 );
               })()}
             </div>
