@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
-import { getSegmentScore, getScoreColor, getSegmentLabel } from '@/data/streetData';
+import { getSegmentScore, getScoreColor, getScoreLabel, getSegmentLabel } from '@/data/streetData';
 import { applyPlacedAmenities } from '@/data/amenities';
 
 const CATS = [
-  { key: 'walkability', label: 'Walk' },
-  { key: 'lighting', label: 'Light' },
-  { key: 'transport', label: 'Transit' },
-  { key: 'visibility', label: 'Visible' },
-  { key: 'accessibility', label: 'Access' },
-  { key: 'roadSafety', label: 'Safety' },
+  { key: 'walkability', label: 'Walk', full: 'Walkability', icon: '🚶' },
+  { key: 'lighting', label: 'Light', full: 'Lighting', icon: '💡' },
+  { key: 'transport', label: 'Transit', full: 'Transport', icon: '🚌' },
+  { key: 'visibility', label: 'Visible', full: 'Visibility', icon: '👁️' },
+  { key: 'accessibility', label: 'Access', full: 'Accessibility', icon: '♿' },
+  { key: 'roadSafety', label: 'Safety', full: 'Road Safety', icon: '🛡️' },
 ];
 
 function polar(cx, cy, r, deg) {
@@ -100,26 +100,39 @@ const RadarChart = ({ segmentCode, onClose, placedAmenities = [] }) => {
           );
         })}
       </svg>
-      <div className="grid grid-cols-3 gap-x-4 gap-y-1 mt-2 text-[10px]">
+      <div className="mt-3 space-y-0.5">
         {CATS.map(cat => {
           const v = score[cat.key];
           const pv = projected?.[cat.key];
-          const delta = pv ? pv - v : 0;
+          const delta = pv != null ? pv - v : 0;
           return (
-            <div key={cat.key} className="flex justify-between gap-1">
-              <span className="text-muted-foreground">{cat.label}</span>
-              <span>
-                <span className="font-bold" style={{ color: getScoreColor(v) }}>{v.toFixed(1)}</span>
+            <div
+              key={cat.key}
+              className="flex items-center justify-between py-1 border-b border-border/60 last:border-b-0"
+            >
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span>{cat.icon}</span>{cat.full}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="font-semibold text-[11px]" style={{ color: getScoreColor(v) }}>
+                  {v.toFixed(1)}
+                </span>
                 {delta > 0.05 && (
-                  <span className="text-score-good ml-0.5">+{delta.toFixed(1)}</span>
+                  <span className="text-score-good text-[10px]">+{delta.toFixed(1)}</span>
                 )}
               </span>
             </div>
           );
         })}
       </div>
+      <div
+        className="mt-2 px-2 py-1.5 rounded-md text-center text-[11px] font-bold"
+        style={{ background: `${color}25`, color }}
+      >
+        {getScoreLabel(score.index)} — {score.index.toFixed(1)}
+      </div>
       {projected && (
-        <div className="flex items-center gap-3 mt-2 text-[9px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-3 mt-2 text-[9px] text-muted-foreground">
           <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5" style={{ backgroundColor: color }} /> Base</span>
           <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 border-t-2 border-dashed" style={{ borderColor: projColor }} /> Projected</span>
         </div>
