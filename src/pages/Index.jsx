@@ -183,10 +183,24 @@ const Index = () => {
               <div className="text-xs text-muted-foreground">{activeCat.description}</div>
             </div>
           )}
-          {/* Radar chart (top-left) */}
+          {/* Radar chart + commentary (top-left) */}
           {highlighted && (
-            <div className="absolute top-4 left-4 z-[1000] w-[260px] max-h-[calc(100%-2rem)] overflow-auto">
+            <div className="absolute top-4 left-4 z-[1000] w-[260px] max-h-[calc(100%-2rem)] overflow-auto space-y-2">
               <RadarChart segmentCode={highlighted} onClose={() => setHighlighted(null)} placedAmenities={placedAmenities} />
+              {(() => {
+                const commentary = getSegmentCommentary(highlighted);
+                if (!commentary) return null;
+                return (
+                  <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">
+                      Insight
+                    </p>
+                    <p className="text-xs text-foreground leading-relaxed">
+                      {commentary}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           )}
           {/* Urban Simulator (top-right) */}
