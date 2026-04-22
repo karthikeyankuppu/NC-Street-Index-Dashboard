@@ -36,7 +36,7 @@ const AmenitySimulator = ({
   const indexDelta = projected.index - base.index;
 
   return (
-    <div className="bg-card border border-border rounded-xl shadow-2xl flex flex-col max-h-[80vh] w-[360px]">
+    <div className="bg-card border border-border rounded-xl shadow-2xl flex flex-col max-h-[80vh] w-full">
       {/* Header */}
       <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
