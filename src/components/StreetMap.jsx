@@ -193,6 +193,57 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, placedAmeniti
     showSegmentPopup(map, code);
   }, [popupSegment]);
 
+  // Buffer around highlighted segment (for amenity placement)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+
+    const srcId = 'segment-buffer';
+    const fillId = 'segment-buffer-fill';
+    const lineId = 'segment-buffer-outline';
+
+    const cleanup = () => {
+      if (map.getLayer(lineId)) map.removeLayer(lineId);
+      if (map.getLayer(fillId)) map.removeLayer(fillId);
+      if (map.getSource(srcId)) map.removeSource(srcId);
+    };
+
+    cleanup();
+    if (!highlightedSegment) return;
+    const geos = segments[highlightedSegment];
+    if (!geos) return;
+
+    const polys = geos.map(g => bufferPolyline(g.coordinates, BUFFER_METERS));
+    const data = {
+      type: 'FeatureCollection',
+      features: polys.map(coords => ({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Polygon', coordinates: [coords] },
+      })),
+    };
+    map.addSource(srcId, { type: 'geojson', data });
+    map.addLayer({
+      id: fillId,
+      type: 'fill',
+      source: srcId,
+      paint: { 'fill-color': '#22d3ee', 'fill-opacity': 0.08 },
+    });
+    map.addLayer({
+      id: lineId,
+      type: 'line',
+      source: srcId,
+      paint: {
+        'line-color': '#22d3ee',
+        'line-width': 2,
+        'line-dasharray': [2, 2],
+        'line-opacity': 0.9,
+      },
+    });
+
+    return cleanup;
+  }, [highlightedSegment]);
+
   // Amenity markers
   useEffect(() => {
     markersRef.current.forEach(m => m.remove());
