@@ -26,6 +26,16 @@ const Index = () => {
   const [is3D, setIs3D] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
   const [criticalOnly, setCriticalOnly] = useState(false);
+  const [popupTrigger, setPopupTrigger] = useState({ code: null, n: 0 });
+
+  const triggerPopup = useCallback((code) => {
+    setPopupTrigger(prev => ({ code, n: prev.n + 1 }));
+  }, []);
+
+  const handleTableSelect = useCallback((code) => {
+    setHighlighted(code);
+    triggerPopup(code);
+  }, [triggerPopup]);
 
   const handleSegmentClick = useCallback((code) => {
     setHighlighted(prev => {

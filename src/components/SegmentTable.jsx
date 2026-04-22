@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { scores, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, segments } from '@/data/streetData';
 import { getSignageBySegment, applySignageImpact } from '@/data/signageData';
 
-const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignageImpact, signageQuarter, criticalOnly }) => {
+const SegmentTable = ({ category, highlightedSegment, onSegmentHover, onSegmentClick, showSignageImpact, signageQuarter, criticalOnly }) => {
   const signageBySegment = useMemo(() => showSignageImpact ? getSignageBySegment(signageQuarter) : {}, [showSignageImpact, signageQuarter]);
 
   const sortedScores = useMemo(() => {
@@ -49,6 +49,7 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, showSignag
                 }`}
                 onMouseEnter={() => onSegmentHover(s.code)}
                 onMouseLeave={() => onSegmentHover(null)}
+                onClick={() => onSegmentClick?.(s.code)}
               >
                 <td className="py-1.5 px-2 font-mono font-medium">{getSegmentLabel(s.code)}</td>
                 <td className="py-1.5 px-2 text-right font-bold" style={{ color }}>
