@@ -1,9 +1,35 @@
 import { useMemo } from 'react';
 import { scores, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel, segments } from '@/data/streetData';
 import { getSignageBySegment, applySignageImpact } from '@/data/signageData';
+import { applyPlacedAmenities } from '@/data/amenities';
 
-const SegmentTable = ({ category, highlightedSegment, onSegmentHover, onSegmentClick, showSignageImpact, signageQuarter, criticalOnly }) => {
-  const signageBySegment = useMemo(() => showSignageImpact ? getSignageBySegment(signageQuarter) : {}, [showSignageImpact, signageQuarter]);
+const SegmentTable = ({
+  category,
+  highlightedSegment,
+  onSegmentHover,
+  onSegmentClick,
+  showSignageImpact,
+  signageQuarter,
+  criticalOnly,
+  showSimulator,
+  placedAmenities = [],
+}) => {
+  const signageBySegment = useMemo(
+    () => showSignageImpact ? getSignageBySegment(signageQuarter) : {},
+    [showSignageImpact, signageQuarter]
+  );
+
+  // Only apply simulator amenities to the currently highlighted segment
+  const simulatorActive = showSimulator && placedAmenities.length > 0 && highlightedSegment;
+
+  const projectedColumnLabel = useMemo(() => {
+    if (showSignageImpact && simulatorActive) return 'w/ Saarthi + Sim';
+    if (showSignageImpact) return 'w/ Saarthi';
+    if (simulatorActive) return 'w/ Sim';
+    return null;
+  }, [showSignageImpact, simulatorActive]);
+
+  const showProjectedColumn = projectedColumnLabel !== null;
 
   const sortedScores = useMemo(() => {
     const withGeo = scores.filter(s => {
@@ -25,8 +51,10 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, onSegmentC
           <tr className="border-b border-border">
             <th className="text-left py-2 px-2 text-muted-foreground font-medium">Segment</th>
             <th className="text-right py-2 px-2 text-muted-foreground font-medium">Score</th>
-            {showSignageImpact && (
-              <th className="text-right py-2 px-2 text-muted-foreground font-medium">w/ Saarthi</th>
+            {showProjectedColumn && (
+              <th className="text-right py-2 px-2 text-muted-foreground font-medium whitespace-nowrap">
+                {projectedColumnLabel}
+              </th>
             )}
             <th className="text-right py-2 px-2 text-muted-foreground font-medium">Rating</th>
           </tr>
@@ -36,8 +64,17 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, onSegmentC
             const value = getScoreForCategory(s, category);
             const color = getScoreColor(value);
             const isActive = highlightedSegment === s.code;
-            const signs = signageBySegment[s.code];
-            const projected = signs ? applySignageImpact(s, signs.length) : null;
+
+            // Build projected score: layer signage first, then simulator amenities (only on highlighted segment)
+            let projected = null;
+            if (showSignageImpact) {
+              const signs = signageBySegment[s.code];
+              if (signs) projected = applySignageImpact(s, signs.length);
+            }
+            if (simulatorActive && s.code === highlightedSegment) {
+              projected = applyPlacedAmenities(projected || s, placedAmenities);
+            }
+
             const projValue = projected ? getScoreForCategory(projected, category) : null;
             const delta = projValue !== null ? projValue - value : 0;
 
@@ -55,7 +92,7 @@ const SegmentTable = ({ category, highlightedSegment, onSegmentHover, onSegmentC
                 <td className="py-1.5 px-2 text-right font-bold" style={{ color }}>
                   {value.toFixed(1)}
                 </td>
-                {showSignageImpact && (
+                {showProjectedColumn && (
                   <td className="py-1.5 px-2 text-right">
                     {projValue !== null ? (
                       <span className="flex items-center justify-end gap-1">
