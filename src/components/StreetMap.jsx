@@ -3,11 +3,14 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScoreLabel, getSegmentLabel } from '@/data/streetData';
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
+import { CURRENT_CAMERAS, NAYICHAAL_CAMERAS } from '@/data/cameraData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly, showCurrentCameras, showNayichaalCameras }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const signageMarkersRef = useRef([]);
+  const currentCamMarkersRef = useRef([]);
+  const nayichaalCamMarkersRef = useRef([]);
   const tooltipRef = useRef(null);
   const segmentPopupRef = useRef(null);
   const readyRef = useRef(false);
