@@ -252,6 +252,7 @@ const Index = () => {
               criticalOnly={criticalOnly}
               showCurrentCameras={showCurrentCameras}
               showNayichaalCameras={showNayichaalCameras}
+              theme={theme}
             />
           </div>
           {/* Category info overlay */}
