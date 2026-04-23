@@ -5,7 +5,7 @@ import { segments, getSegmentScore, getScoreColor, getScoreForCategory, getScore
 import { SIGNAGE_POINTS, SIGNAGE_CATEGORIES } from '@/data/signageData';
 import { CURRENT_CAMERAS, NAYICHAAL_CAMERAS } from '@/data/cameraData';
 
-const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly, showCurrentCameras, showNayichaalCameras }) => {
+const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, signageQuarter, is3D, criticalOnly, showCurrentCameras, showNayichaalCameras, theme = 'dark' }) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const signageMarkersRef = useRef([]);
@@ -23,24 +23,28 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    const isDark = theme === 'dark';
+    const tileVariant = isDark ? 'dark_all' : 'light_all';
+    const bgColor = isDark ? '#0a0a0a' : '#e9eef2';
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: {
         version: 8,
         sources: {
-          'carto-dark': {
+          'carto-base': {
             type: 'raster',
             tiles: [
-              'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-              'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+              `https://a.basemaps.cartocdn.com/${tileVariant}/{z}/{x}/{y}@2x.png`,
+              `https://b.basemaps.cartocdn.com/${tileVariant}/{z}/{x}/{y}@2x.png`,
             ],
             tileSize: 256,
             attribution: '&copy; OSM &copy; CARTO',
           },
         },
         layers: [
-          { id: 'bg', type: 'background', paint: { 'background-color': '#0a0a0a' } },
-          { id: 'carto', type: 'raster', source: 'carto-dark' },
+          { id: 'bg', type: 'background', paint: { 'background-color': bgColor } },
+          { id: 'carto', type: 'raster', source: 'carto-base' },
         ],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
       },
@@ -139,6 +143,30 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       map.setLayoutProperty('3d-buildings', 'visibility', is3D ? 'visible' : 'none');
     }
   }, [is3D]);
+
+  // Theme: swap base raster tiles + background + 3D building color when theme changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    const isDark = theme === 'dark';
+    const tileVariant = isDark ? 'dark_all' : 'light_all';
+    const bgColor = isDark ? '#0a0a0a' : '#e9eef2';
+    const buildingColor = isDark ? '#1a1a2e' : '#c8d0db';
+
+    const src = map.getSource('carto-base');
+    if (src && typeof src.setTiles === 'function') {
+      src.setTiles([
+        `https://a.basemaps.cartocdn.com/${tileVariant}/{z}/{x}/{y}@2x.png`,
+        `https://b.basemaps.cartocdn.com/${tileVariant}/{z}/{x}/{y}@2x.png`,
+      ]);
+    }
+    if (map.getLayer('bg')) {
+      map.setPaintProperty('bg', 'background-color', bgColor);
+    }
+    if (map.getLayer('3d-buildings')) {
+      map.setPaintProperty('3d-buildings', 'fill-extrusion-color', buildingColor);
+    }
+  }, [theme]);
 
   // Update segment paint on category/highlight/criticalOnly change
   useEffect(() => {
