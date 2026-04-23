@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import nayichaalLogo from '@/assets/nayichaal-logo.png';
 import StreetMap from '@/components/StreetMap';
 import CategoryPanel from '@/components/CategoryPanel';
@@ -17,6 +18,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
 import { CalendarDays } from 'lucide-react';
 
+const THEME_KEY = 'nc-theme';
+
 const Index = () => {
   const [category, setCategory] = useState('index');
   const [highlighted, setHighlighted] = useState(null);
@@ -30,6 +33,21 @@ const Index = () => {
   const [showCurrentCameras, setShowCurrentCameras] = useState(false);
   const [showNayichaalCameras, setShowNayichaalCameras] = useState(false);
   const [hovered, setHovered] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem(THEME_KEY) || 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* ignore */ }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  }, []);
 
   const placedAmenities = highlighted ? (amenitiesBySegment[highlighted] || []) : [];
 
@@ -194,6 +212,24 @@ const Index = () => {
                 3D
               </Label>
             </div>
+
+            {/* Theme toggle (standalone) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5 hover:bg-background transition-colors"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-secondary" />
+              ) : (
+                <Moon className="w-4 h-4 text-primary" />
+              )}
+              <span className="text-xs font-semibold text-foreground">
+                {theme === 'dark' ? 'Light' : 'Dark'}
+              </span>
+            </button>
           </div>
         </div>
         <div className="mt-3">
