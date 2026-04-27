@@ -229,7 +229,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       <circle cx="12" cy="13" r="3"/>
     </svg>`;
 
-  // Current Infra cameras (Camera_locs_godowlia)
+  // Existing Infra cameras (Camera_locs_godowlia)
   useEffect(() => {
     currentCamMarkersRef.current.forEach(m => m.remove());
     currentCamMarkersRef.current = [];
