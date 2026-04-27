@@ -114,7 +114,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
           tooltipRef.current?.remove();
           tooltipRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 })
             .setLngLat(e.lngLat)
-            .setHTML(`<div style="font-family:system-ui;text-align:center"><strong>${getSegmentLabel(code)}</strong><div style="margin:4px 0;font-size:18px;font-weight:700;color:${col}">${val.toFixed(1)}</div><div style="font-size:10px;color:#999">Click for details</div></div>`)
+            .setHTML(`<div style="font-family:system-ui;text-align:center;background:#1f2937;color:#e5e7eb;padding:8px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4)"><strong style="color:#fff">${getSegmentLabel(code)}</strong><div style="margin:4px 0;font-size:18px;font-weight:700;color:${col}">${val.toFixed(1)}</div><div style="font-size:10px;color:#cbd5e1">Click for details</div></div>`)
             .addTo(map);
         });
 
