@@ -280,7 +280,7 @@ const Index = () => {
                         <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">
                           Insight
                         </p>
-                        <p className="text-xs text-foreground leading-relaxed font-bold">
+                        <p className="text-xs text-foreground leading-relaxed">
                           {commentary}
                         </p>
                       </div>
