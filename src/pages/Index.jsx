@@ -110,15 +110,15 @@ const Index = () => {
             {/* Live Weather */}
             <WeatherWidget />
 
-            {/* Current Infra */}
+            {/* Existing Infra */}
             <div className="rounded-lg border border-border bg-background/40 px-2.5 pt-1 pb-2">
               <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1 px-0.5">
-                Current Infra
+                Existing Infra
               </div>
               <div className="flex items-center gap-2 rounded-md border border-border bg-background/60 px-2.5 py-1.5">
                 <Switch id="cur-cam-toggle" checked={showCurrentCameras} onCheckedChange={setShowCurrentCameras} />
                 <Label htmlFor="cur-cam-toggle" className="text-xs text-foreground cursor-pointer whitespace-nowrap">
-                  Current Cameras
+                  Existing Cameras
                 </Label>
               </div>
             </div>
