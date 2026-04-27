@@ -114,7 +114,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
           tooltipRef.current?.remove();
           tooltipRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10 })
             .setLngLat(e.lngLat)
-            .setHTML(`<div style="font-family:system-ui;text-align:center"><strong>${getSegmentLabel(code)}</strong><div style="margin:4px 0;font-size:18px;font-weight:700;color:${col}">${val.toFixed(1)}</div><div style="font-size:10px;color:#999">Click for details</div></div>`)
+            .setHTML(`<div style="font-family:system-ui;text-align:center;background:#1f2937;color:#e5e7eb;padding:8px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4)"><strong style="color:#fff">${getSegmentLabel(code)}</strong><div style="margin:4px 0;font-size:18px;font-weight:700;color:${col}">${val.toFixed(1)}</div><div style="font-size:10px;color:#cbd5e1">Click for details</div></div>`)
             .addTo(map);
         });
 
@@ -212,7 +212,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       const subLabel = sp.subcategory ? ` (${sp.subcategory})` : '';
       const nameLabel = sp.name ? `<br/><b>${sp.name}</b>` : '';
       const popup = new maplibregl.Popup({ offset: 14, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5"><b style="color:#fff">${catInfo.label}${subLabel}</b>${nameLabel}<div style="color:#888;margin-top:2px">Q${sp.quarter} • ${sp.id}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4)"><b style="color:#fff">${catInfo.label}${subLabel}</b>${nameLabel}<div style="color:#cbd5e1;margin-top:2px">Q${sp.quarter} • ${sp.id}</div></div>`
       );
 
       const m = new maplibregl.Marker({ element: el }).setLngLat([sp.lng, sp.lat]).setPopup(popup).addTo(map);
@@ -241,7 +241,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
       el.innerHTML = cameraIconSvg('#f59e0b');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">Current Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#888;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4);min-width:160px"><b style="color:#fff">Current Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#cbd5e1;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
       );
       const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
       currentCamMarkersRef.current.push(m);
@@ -260,7 +260,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
       el.innerHTML = cameraIconSvg('#06b6d4');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#888;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4);min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#cbd5e1;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
       );
       const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
       nayichaalCamMarkersRef.current.push(m);
