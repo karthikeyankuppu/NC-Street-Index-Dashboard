@@ -8,6 +8,7 @@ import SegmentTable from '@/components/SegmentTable';
 import StatsBar from '@/components/StatsBar';
 import RadarChart from '@/components/RadarChart';
 import AmenitySimulator from '@/components/AmenitySimulator';
+import WeatherWidget from '@/components/WeatherWidget';
 
 import { CATEGORIES } from '@/data/streetData';
 import { getSegmentCommentary, getImprovementLevers } from '@/data/segmentCommentary';
