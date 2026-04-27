@@ -212,7 +212,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       const subLabel = sp.subcategory ? ` (${sp.subcategory})` : '';
       const nameLabel = sp.name ? `<br/><b>${sp.name}</b>` : '';
       const popup = new maplibregl.Popup({ offset: 14, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5"><b style="color:#fff">${catInfo.label}${subLabel}</b>${nameLabel}<div style="color:#888;margin-top:2px">Q${sp.quarter} • ${sp.id}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4)"><b style="color:#fff">${catInfo.label}${subLabel}</b>${nameLabel}<div style="color:#cbd5e1;margin-top:2px">Q${sp.quarter} • ${sp.id}</div></div>`
       );
 
       const m = new maplibregl.Marker({ element: el }).setLngLat([sp.lng, sp.lat]).setPopup(popup).addTo(map);
