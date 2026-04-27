@@ -229,7 +229,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       <circle cx="12" cy="13" r="3"/>
     </svg>`;
 
-  // Current Infra cameras (Camera_locs_godowlia)
+  // Existing Infra cameras (Camera_locs_godowlia)
   useEffect(() => {
     currentCamMarkersRef.current.forEach(m => m.remove());
     currentCamMarkersRef.current = [];
@@ -241,7 +241,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
       el.innerHTML = cameraIconSvg('#f59e0b');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4);min-width:160px"><b style="color:#fff">Current Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#cbd5e1;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4);min-width:160px"><b style="color:#fff">Existing Camera</b><br/>Pole ${cam.poleId} — ${cam.name || ''}<div style="color:#cbd5e1;margin-top:2px">${cam.cameras ?? '?'} cams • ${cam.status || ''}</div></div>`
       );
       const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
       currentCamMarkersRef.current.push(m);
