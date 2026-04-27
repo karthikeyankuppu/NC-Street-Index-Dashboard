@@ -107,6 +107,9 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-end gap-3 flex-wrap">
+            {/* Live Weather */}
+            <WeatherWidget />
+
             {/* Current Infra */}
             <div className="rounded-lg border border-border bg-background/40 px-2.5 pt-1 pb-2">
               <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground mb-1 px-0.5">
