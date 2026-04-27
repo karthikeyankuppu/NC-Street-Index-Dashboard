@@ -260,7 +260,7 @@ const StreetMap = ({ category, highlightedSegment, onSegmentClick, showSignage, 
       el.style.cssText = 'cursor:pointer;display:flex;align-items:center;justify-content:center';
       el.innerHTML = cameraIconSvg('#06b6d4');
       const popup = new maplibregl.Popup({ offset: 10, className: 'nc-popup' }).setHTML(
-        `<div style="font-size:12px;font-family:system-ui;color:#e5e5e5;min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#888;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
+        `<div style="font-size:12px;font-family:system-ui;color:#e5e7eb;background:#1f2937;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 4px 14px rgba(0,0,0,.4);min-width:160px"><b style="color:#fff">NayiChaal Camera</b><br/>${cam.name || ''} — ${cam.location || ''}<div style="color:#cbd5e1;margin-top:2px">${cam.type || ''} • ${cam.status || ''}</div></div>`
       );
       const m = new maplibregl.Marker({ element: el }).setLngLat([cam.lng, cam.lat]).setPopup(popup).addTo(map);
       nayichaalCamMarkersRef.current.push(m);
